@@ -16,10 +16,11 @@ from .alerts import Alerts
 from .telegram import Telegram
 
 log = logging.getLogger(__name__)
-BUTTONS = [("📈 Market", "watchmarket"), ("💎 Deals", "watchdeals")]
-CALLBACKS = {"watchmarket", "watchdeals", "watchstatus"}   # cheap commands only, never a Claude call
+BUTTONS = [("🔄 Run again", "watchlistings"), ("💎 Deals", "watchdeals"), ("📈 Market", "watchmarket")]
+CALLBACKS = {"watchlistings", "watchmarket", "watchdeals", "watchstatus"}   # cheap commands only, never a Claude call
 HELP = "\n".join([
     cards.header("hello", "Singapore watch market"), "",
+    "/watchlistings · the latest Singapore listings with buy links",
     "/watchmarket · market value per watched reference",
     "/watchdeals · open deals that clear your margin",
     "/watchlist · the watchlist with retail prices",
@@ -102,6 +103,22 @@ def alert_new(x, run_id: str) -> None:
     if texts:
         x.post(texts)
         vault.log_event("📨", "new finds sent", f"{len(texts)} message(s)")
+
+
+OPEN_LISTINGS = "SELECT * FROM listings WHERE ended_at IS NULL AND price_sgd>0 ORDER BY last_seen DESC, id DESC"
+
+
+def listing_cards(x, n: int) -> tuple[list[str], list[dict]]:
+    """Up to n stored Singapore listings, the newest per reference first. No Claude call."""
+    rows = [dict(r) for r in x.db.execute(OPEN_LISTINGS)]
+    picked = list({r["ref"]: r for r in reversed(rows)}.values())[:n]
+    picked += [r for r in rows if r not in picked][: n - len(picked)]
+    if not picked:
+        return [], []
+    mv = market.values(x.s, x.db, x.lim.today())
+    items = [(l, refsmod.get(x.db, l["ref"]), (mv.get(l["ref"]) or {}).get("value")
+              if (mv.get(l["ref"]) or {}).get("label") == "market" else None) for l in picked]
+    return cards.listings(items), picked
 
 
 def market_cards(x) -> list[str]:
@@ -189,11 +206,15 @@ class Bot:
 
     cmd_start = cmd_watchhelp
 
+    def cmd_watchlistings(self, arg):
+        texts, _ = listing_cards(self.x, int(arg) if arg.isdigit() else 10)
+        return texts or [cards.header("listings", cards.today()) + "\n\n⚪ <i>No Singapore listings stored yet.</i>"]
+
     def cmd_watchmarket(self, arg):
         return market_cards(self.x)
 
     def cmd_watchdeals(self, arg):
-        return deal_cards(self.x, only_new=False) or [cards.header("deals", "none right now") + "\n\n<i>No open "
+        return deal_cards(self.x, only_new=False) or [cards.header("deals", cards.today()) + "\n\n⚪ <i>No open "
                                                       "Singapore listing clears your margin and profit floors.</i>"]
 
     def cmd_watchstatus(self, arg):
@@ -202,8 +223,9 @@ class Bot:
 
     def cmd_watchlist(self, arg):
         rows = refsmod.watched(self.x.db)
-        blocks = [f"⌚ <b>{cards.name(r)}</b> · <code>{cards.esc(r['ref'])}</code>\n🏷 retail {cards.money(r['retail_sgd'])}"
-                  for r in rows]
+        blocks = [cards.card(n, cards.plain_name(r), r.get("retail_url"),
+                             ["🏷 " + cards.dot(f"Retail {cards.money(r['retail_sgd'])}", r.get("retail_date"))], desc=r["ref"])
+                  for n, r in enumerate(rows, start=1)]
         return cards.split(cards.header("watchlist", f"{len(rows)} references"), blocks)
 
     def cmd_watchadd(self, arg):

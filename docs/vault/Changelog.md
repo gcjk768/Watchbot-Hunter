@@ -5,6 +5,7 @@ updated: 2026-10-03
 # Changelog
 
 ## 2026-10-03
+- feat: cards follow the SG car tracker layout (`watchbot/cards.py`): numbered `emoji n. <a>Name</a> · ref 🆕 NEW` heads, dot-joined lines, `$` money, ▲/▼ deltas, notes collapsed last; 🔄 Run again / 💎 Deals / 📈 Market buttons; `/watchlistings`
 - fix: discovery keeps a listing only when its URL names the reference and is not another country's locale (`buyable` in `watchbot/ai.py`); haiku returned category pages and en-MY/en-VN pages
 - operating hours 05:00 to 21:00 SGT, avoiding the trading desk US session; discovery 5x/day, claude cap 8
 - feat: 🆕 new-listing alerts the moment they are found, once each (`alerted` table); discovery every 3 h 24/7; claude cap 12/day

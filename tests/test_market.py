@@ -90,9 +90,13 @@ def test_listing_card_marks_below_retail_green_and_escapes():
     l = {"price_sgd": 14000, "source": "discover", "site": "watchexchange.sg", "url": "https://a.sg/?a=1&b=2",
          "raw_json": '{"from_search": true}', "condition": "excellent", "year": 2022, "full_set": 1, "seller_type": "dealer"}
     out = cards.listings([(l, ref, None)])
-    assert len(out) == 1 and "🟢 <i>▼12% vs retail</i>" in out[0] and "Sub &lt;x&gt;" in out[0]
+    assert len(out) == 1 and "🟢 <i>▼1,950 (12.2%) vs retail</i>" in out[0] and "Sub &lt;x&gt;" in out[0]
+    # same card head as the SG car tracker: numbered, the name is the link, the reference after a dot
+    assert '⌚ <b>1. <a href="https://a.sg/?a=1&amp;b=2">Rolex Sub &lt;x&gt;</a></b> · 126610LN' in out[0]
+    assert out[0].startswith("⌚ <b>WATCH LISTINGS</b> · 1 in Singapore") and out[0].endswith("</blockquote>")
+    assert "💰 $14,000 · 2022 · full set · excellent" in out[0]
     assert 'href="https://a.sg/?a=1&amp;b=2"' in out[0] and "<i>from search</i>" in out[0]
-    assert "🛒 <a" in out[0] and "Buy at a.sg</a>" in out[0] and "🏠 a.sg" in out[0]
+    assert "🛒 <a" in out[0] and "Buy at a.sg</a>" in out[0] and "🏠 a.sg · dealer" in out[0]
 
 
 def test_new_finds_alert_once_and_skip_deals(s, db, lim):
