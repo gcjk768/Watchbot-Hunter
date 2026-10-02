@@ -7,14 +7,15 @@ updated: 2026-10-03
 **Live:** NAS stack `/volume1/docker/watchbot` (container `watchbot`), bot @jameskoh_watchbot → James Channel topic 4164. Alerts DM 388437106. Runtime vault `/volume1/James/Obsidian/Watchbot`.
 
 ## Jobs (`watchbot/serve.py`)
+**Operating hours 05:00 to 21:00 SGT** (James, 2026-10-03): quiet while the trading desk runs the US session (21:30 to 04:00 SGT, 22:30 to 05:00 after US DST ends) so the shared Claude plan and the channel stay with the desk. Commands still answer any time. `/watchhelp` says the same; crons in `config.yaml`.
 | When (SGT) | Job | Claude? |
 |---|---|---|
-| hourly :07, 24/7 (fleet hours) | eBay SG collect → `watchbot/market.py` values → 💎 card for **new** deals only | no |
-| every 3 h (:30), 24/7 | discovery: one `claude -p` web search (haiku) for SG listings + news (`watchbot/ai.py`) | yes |
+| hourly :07, 05 to 20 | eBay SG collect → `watchbot/market.py` values → 💎 card for **new** deals only | no |
+| 06:30 09:30 12:30 15:30 18:30 | discovery: one `claude -p` web search (haiku) for SG listings + news (`watchbot/ai.py`) | yes |
 | 08:00 | lesson, topic rotation (haiku) (`watchbot/ai.py`) | yes |
 | 08:30 | 📈 market card (`watchbot/cards.py`) | no |
 
-New finds post the moment a job sees them, 24/7: 💎 deal cards first, then 🆕 listing cards for every listing never sent before (`alerted` table, `new_finds` in `watchbot/serve.py`). Every listing and deal card ends with a 🛒 **Buy at <shop>** link.
+New finds post the moment a job sees them (inside operating hours): 💎 deal cards first, then 🆕 listing cards for every listing never sent before (`alerted` table, `new_finds` in `watchbot/serve.py`). Every listing and deal card ends with a 🛒 **Buy at <shop>** link.
 
 ## Commands (owner only, own topic or DM; unique `/watch*` names)
 `/watchhelp /watchmarket /watchdeals /watchlist /watchadd REF Brand Model /watchdel REF /watchstatus`. Buttons whitelist: market, deals, status.

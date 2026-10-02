@@ -26,7 +26,7 @@ HELP = "\n".join([
     "/watchadd <code>REF Brand Model</code> · watch a reference",
     "/watchdel <code>REF</code> · stop watching it",
     "/watchstatus · budgets, cooldowns, data held",
-    "<i>Hourly eBay collect, discovery every 3 h, lesson 08:00, market card 08:30. New deals and new listings post the moment they appear, 24/7.</i>"])
+    "<i>05:00 to 21:00 SGT (quiet in the trading desk's US session): hourly eBay collect, discovery every 3 h, lesson 08:00, market card 08:30. New deals and listings post the moment they appear.</i>"])
 
 
 class Ctx:

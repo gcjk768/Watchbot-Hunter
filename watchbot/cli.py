@@ -190,7 +190,7 @@ def cmd_hello(s, a) -> int:
         cards.header("hello", "deployed and listening"), "",
         f"⌚ <b>Watchlist</b> · {n} references, Singapore only",
         f"🔎 eBay SG collect · <i>hourly</i>" + ("" if s.secrets.ebay_client_id else " · 🔴 <i>no EBAY_CLIENT_ID yet</i>"),
-        "🌐 Discovery every 3 h · 🎓 lesson 08:00 · 📈 market 08:30 · 🆕 new finds at once",
+        "⏰ 05:00 to 21:00 SGT, quiet in the trading desk session", "🌐 Discovery every 3 h · 🎓 lesson 08:00 · 📈 market 08:30 · 🆕 new finds at once",
         f"🤖 claude -p · <code>{cards.esc(s.claude.model)}</code> / <code>{cards.esc(s.claude.discover_model)}</code>"
         + (" · 🟢" if shutil.which(s.claude.binary) else " · 🔴 <i>CLI missing</i>"),
         "🧾 Paper mode · <i>learn first, real buys only after 10 closed paper trades</i>", "",

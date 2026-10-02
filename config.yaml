@@ -39,8 +39,9 @@ telegram:
 
 schedule:
   timezone: Asia/Singapore
-  collect_cron: "7 * * * *"      # hourly 24/7 like the rest of the fleet; cards only for new deals
-  discover_cron: "30 */3 * * *"  # claude -p web search every 3 h, 24/7; new finds post at once
+  # quiet 21:00 to 05:00 SGT: the trading desk runs the US session then (21:30 to 04:00, 22:30 to 05:00 in winter)
+  collect_cron: "7 5-20 * * *"   # hourly outside the desk session; new finds post at once
+  discover_cron: "30 6,9,12,15,18 * * *"   # claude -p web search every 3 h outside the desk session
   lesson_cron: "0 8 * * *"
   market_cron: "30 8 * * *"      # daily market card for the watchlist
 
@@ -85,7 +86,7 @@ limits:
   daily_calls_watchcharts: 100
   daily_calls_fx: 4
   telegram: {min_gap_seconds: 3.5, max_per_minute: 17, max_retry_after_seconds: 900}
-  claude: {max_calls_per_day: 12}   # 8 discoveries + 1 lesson + headroom; 12 is the hard ceiling
+  claude: {max_calls_per_day: 8}    # 5 discoveries + 1 lesson + headroom
 
 claude:
   binary: claude
