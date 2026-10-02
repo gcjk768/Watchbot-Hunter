@@ -48,6 +48,7 @@ def test_usage_limits(text, kind):
 
 
 def test_flags_for_writing_disallow_every_tool(s):
+    s.claude.fallback_model = "sonnet"   # config runs haiku for both; a distinct fallback must be passed
     cmd = claude.build_cmd(s, "sys.md", SCHEMA, web=False, max_turns=3)
     for flag in ("--output-format", "--json-schema", "--permission-mode", "--permission-prompts", "--strict-mcp-config",
                  "--no-session-persistence", "--fallback-model"):

@@ -83,3 +83,12 @@ def test_callback_whitelist_always_answers(s, db, lim):
     Bot(x).handle({"callback_query": {"id": "q", "data": "watchadd 1 2", "from": {"id": 7},
                                       "message": {"chat": {"id": 7, "type": "private"}}}})
     assert x.tg.calls == ["answerCallbackQuery"]   # not whitelisted: answered, nothing run
+
+
+def test_listing_card_marks_below_retail_green_and_escapes():
+    ref = {"brand": "Rolex", "model": "Sub <x>", "ref": "126610LN", "retail_sgd": 15950}
+    l = {"price_sgd": 14000, "source": "discover", "site": "watchexchange.sg", "url": "https://a.sg/?a=1&b=2",
+         "raw_json": '{"from_search": true}', "condition": "excellent", "year": 2022, "full_set": 1, "seller_type": "dealer"}
+    out = cards.listings([(l, ref, None)])
+    assert len(out) == 1 and "🟢 <i>▼12% vs retail</i>" in out[0] and "Sub &lt;x&gt;" in out[0]
+    assert 'href="https://a.sg/?a=1&amp;b=2"' in out[0] and "<i>from search</i>" in out[0]

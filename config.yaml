@@ -39,7 +39,7 @@ telegram:
 
 schedule:
   timezone: Asia/Singapore
-  collect_cron: "7 * * * *"      # hourly eBay collect, then a card for new deals only
+  collect_cron: "7 * * * *"      # hourly 24/7 like the rest of the fleet; cards only for new deals
   discover_cron: "30 6 * * *"    # one claude -p web search for Singapore listings and news
   lesson_cron: "0 8 * * *"
   market_cron: "30 8 * * *"      # daily market card for the watchlist
@@ -89,9 +89,9 @@ limits:
 
 claude:
   binary: claude
-  model: haiku                   # lessons; cheap by fleet policy
-  fallback_model: sonnet
-  discover_model: sonnet         # web search needs the stronger model
+  model: haiku                   # every claude -p call runs on haiku (the owner, 2026-10-03)
+  fallback_model: haiku          # equal to model, so no --fallback-model flag is passed
+  discover_model: haiku
   max_retries: 2                 # CLAUDE_CODE_MAX_RETRIES
   timeout_seconds: 900
   discover_max_turns: 40

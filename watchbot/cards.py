@@ -5,6 +5,7 @@ from html import escape
 
 SECTION_TITLES = {
     "deals": "💎 <b>WATCH DEALS</b>",
+    "listings": "🔎 <b>WATCH LISTINGS</b>",
     "market": "📈 <b>WATCH MARKET</b>",
     "lesson": "🎓 <b>WATCH LESSON</b>",
     "status": "🩺 <b>WATCHBOT STATUS</b>",
@@ -114,3 +115,33 @@ def status(text: str) -> str:
 
 def alert(kind: str, text: str) -> str:
     return f"{header('alert', kind)}\n\n{esc(text)}"
+
+
+def listing_block(l: dict, ref: dict, market_value: float | None) -> str:
+    """One Singapore listing: price against market (when solid) or retail, marker good/bad for a buyer."""
+    p, base, what = l["price_sgd"], market_value, "market"
+    if not base:
+        base, what = ref.get("retail_sgd"), "retail"
+    vs = ""
+    if p and base:
+        pct = round((p / base - 1) * 100)
+        mk = "⚪" if abs(pct) < 2 else ("🟢" if pct < 0 else "🔴")
+        vs = f" · {mk} <i>{'▼' if pct < 0 else '▲'}{abs(pct)}% vs {what}</i>"
+    bits = [l.get("condition"), str(l["year"]) if l.get("year") else None,
+            {1: "full set", 0: "watch only"}.get(l.get("full_set")), l.get("seller_type")]
+    raw = l.get("raw_json") or ""
+    lines = [f"⌚ <b>{name(ref)}</b> · <code>{esc(ref['ref'])}</code>",
+             f"💰 {money(p)} asking · retail {money(ref.get('retail_sgd'))}{vs}"]
+    if any(bits):
+        lines.append("🏷 " + " · ".join(esc(b) for b in bits if b))
+    site = l.get("site") or l["source"]
+    lines.append(f"🏠 {esc(site)}" + (" · <i>from search</i>" if '"from_search": true' in raw else ""))
+    if l.get("url"):
+        lines.append("🔗 " + link(l["url"], "Listing"))
+    return "\n".join(lines)
+
+
+def listings(items: list[tuple[dict, dict, float | None]]) -> list[str]:
+    return split(header("listings", f"{len(items)} in Singapore"), [listing_block(*i) for i in items],
+                 "<blockquote expandable>Asking prices, not sales. 🟢 below and 🔴 above the reference price. "
+                 "Paper mode: learn, do not buy yet.</blockquote>")

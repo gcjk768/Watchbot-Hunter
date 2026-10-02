@@ -149,6 +149,32 @@ def cmd_deals(s, a) -> int:
     return 0
 
 
+def cmd_sample(s, a) -> int:
+    """Post N Singapore listings as watch cards, one per reference first. Runs one discovery call when the
+    database holds fewer than N open listings (eBay keys missing, or first run)."""
+    from . import ai, cards, market, refs, serve, vault
+    x = serve.Ctx(s)
+    refs.seed(x.db, s)
+    q = "SELECT * FROM listings WHERE ended_at IS NULL AND price_sgd>0 ORDER BY last_seen DESC, id DESC"
+    if len(x.db.execute(q).fetchall()) < a.n:
+        out = ai.discover(s, x.db, x.lim, x.lim.today())
+        print(f"discovery: {out['listings']} kept, {out['dropped']} dropped; {out['note']}")
+        vault.log_event("🌐", "discovery", f"{out['listings']} Singapore listings kept, {out['dropped']} dropped")
+    rows = [dict(r) for r in x.db.execute(q)]
+    picked = list({r["ref"]: r for r in reversed(rows)}.values())[: a.n]   # newest per reference
+    picked += [r for r in rows if r not in picked][: a.n - len(picked)]
+    if not picked:
+        print("no Singapore listings found")
+        return 1
+    mv = market.values(s, x.db, x.lim.today())
+    items = [(l, refs.get(x.db, l["ref"]), (mv.get(l["ref"]) or {}).get("value")
+              if (mv.get(l["ref"]) or {}).get("label") == "market" else None) for l in picked]
+    x.post(cards.listings(items))
+    vault.log_event("📨", "listings posted", f"{len(items)} watches")
+    print(f"posted {len(items)} watches")
+    return 0
+
+
 def cmd_hello(s, a) -> int:
     """One test card into the bot's topic, with the follow up buttons."""
     import shutil
@@ -183,6 +209,7 @@ def main(argv=None) -> int:
                  "hello"):
         sub.add_parser(name)
     sub.add_parser("market").add_argument("--post", action="store_true", help="post the card instead of printing")
+    sub.add_parser("sample", help="post N Singapore listings as watch cards").add_argument("n", type=int, nargs="?", default=5)
     a = ap.parse_args(argv)
     try:
         s = config.load()
@@ -192,7 +219,7 @@ def main(argv=None) -> int:
     setup_logging(s)
     cmds = {"collect": cmd_collect, "backfill": cmd_backfill, "status": cmd_status, "purge": cmd_purge,
             "test-telegram": cmd_test_telegram, "watchlist": cmd_watchlist, "serve": cmd_serve, "health": cmd_health,
-            "market": cmd_market, "deals": cmd_deals, "hello": cmd_hello,
+            "market": cmd_market, "deals": cmd_deals, "hello": cmd_hello, "sample": cmd_sample,
             "discover": lambda s, a: _job("discover", s), "lesson": lambda s, a: _job("lesson", s)}
     try:
         return cmds[a.cmd](s, a)
