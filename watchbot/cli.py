@@ -170,6 +170,8 @@ def cmd_sample(s, a) -> int:
     items = [(l, refs.get(x.db, l["ref"]), (mv.get(l["ref"]) or {}).get("value")
               if (mv.get(l["ref"]) or {}).get("label") == "market" else None) for l in picked]
     x.post(cards.listings(items))
+    for l in picked:
+        x.db.execute("INSERT OR IGNORE INTO alerted(listing_id, at) VALUES(?,?)", (l["id"], x.lim.today()))
     vault.log_event("📨", "listings posted", f"{len(items)} watches")
     print(f"posted {len(items)} watches")
     return 0
@@ -188,7 +190,7 @@ def cmd_hello(s, a) -> int:
         cards.header("hello", "deployed and listening"), "",
         f"⌚ <b>Watchlist</b> · {n} references, Singapore only",
         f"🔎 eBay SG collect · <i>hourly</i>" + ("" if s.secrets.ebay_client_id else " · 🔴 <i>no EBAY_CLIENT_ID yet</i>"),
-        "🌐 Discovery 06:30 · 🎓 lesson 08:00 · 📈 market 08:30",
+        "🌐 Discovery every 3 h · 🎓 lesson 08:00 · 📈 market 08:30 · 🆕 new finds at once",
         f"🤖 claude -p · <code>{cards.esc(s.claude.model)}</code> / <code>{cards.esc(s.claude.discover_model)}</code>"
         + (" · 🟢" if shutil.which(s.claude.binary) else " · 🔴 <i>CLI missing</i>"),
         "🧾 Paper mode · <i>learn first, real buys only after 10 closed paper trades</i>", "",

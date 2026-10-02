@@ -40,7 +40,7 @@ def test_ebay_and_claude_caps(lim, s):
         lim.acquire("ebay", "browse")
     with pytest.raises(BudgetExhausted):
         lim.acquire("ebay", "browse")
-    for _ in range(6):
+    for _ in range(s.limits.claude.max_calls_per_day):
         lim.acquire_claude()
     with pytest.raises(BudgetExhausted):
         lim.acquire_claude()

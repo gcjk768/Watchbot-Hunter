@@ -10,9 +10,11 @@ updated: 2026-10-03
 | When (SGT) | Job | Claude? |
 |---|---|---|
 | hourly :07, 24/7 (fleet hours) | eBay SG collect → `watchbot/market.py` values → 💎 card for **new** deals only | no |
-| 06:30 | discovery: one `claude -p` web search (haiku) for SG listings + news (`watchbot/ai.py`) | yes |
+| every 3 h (:30), 24/7 | discovery: one `claude -p` web search (haiku) for SG listings + news (`watchbot/ai.py`) | yes |
 | 08:00 | lesson, topic rotation (haiku) (`watchbot/ai.py`) | yes |
 | 08:30 | 📈 market card (`watchbot/cards.py`) | no |
+
+New finds post the moment a job sees them, 24/7: 💎 deal cards first, then 🆕 listing cards for every listing never sent before (`alerted` table, `new_finds` in `watchbot/serve.py`). Every listing and deal card ends with a 🛒 **Buy at <shop>** link.
 
 ## Commands (owner only, own topic or DM; unique `/watch*` names)
 `/watchhelp /watchmarket /watchdeals /watchlist /watchadd REF Brand Model /watchdel REF /watchstatus`. Buttons whitelist: market, deals, status.

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from html import escape
+from urllib.parse import urlparse
 
 SECTION_TITLES = {
     "deals": "💎 <b>WATCH DEALS</b>",
@@ -26,6 +27,15 @@ def esc(v) -> str:
 
 def money(v) -> str:
     return "unknown" if v is None else f"S${v:,.0f}"
+
+
+def shop(url: str) -> str:
+    return (urlparse(url).hostname or "").removeprefix("www.")
+
+
+def buy(url: str) -> str:
+    """The purchase link line every listing and deal card ends with."""
+    return "🛒 " + link(url, f"Buy at {shop(url) or 'listing'}")
 
 
 def link(url: str, label: str) -> str:
@@ -67,7 +77,7 @@ def deal_block(d: dict) -> str:
     if d["flags"]:
         lines.append("⚠️ <i>" + esc("; ".join(d["flags"])) + "</i>")
     if l.get("url"):
-        lines.append("🔗 " + link(l["url"], f"{l['source']} listing"))
+        lines.append(buy(l["url"]))
     return "\n".join(lines)
 
 
@@ -134,14 +144,15 @@ def listing_block(l: dict, ref: dict, market_value: float | None) -> str:
              f"💰 {money(p)} asking · retail {money(ref.get('retail_sgd'))}{vs}"]
     if any(bits):
         lines.append("🏷 " + " · ".join(esc(b) for b in bits if b))
-    site = l.get("site") or l["source"]
+    site = shop(l.get("url") or "") or l["source"]
     lines.append(f"🏠 {esc(site)}" + (" · <i>from search</i>" if '"from_search": true' in raw else ""))
     if l.get("url"):
-        lines.append("🔗 " + link(l["url"], "Listing"))
+        lines.append(buy(l["url"]))
     return "\n".join(lines)
 
 
-def listings(items: list[tuple[dict, dict, float | None]]) -> list[str]:
-    return split(header("listings", f"{len(items)} in Singapore"), [listing_block(*i) for i in items],
+def listings(items: list[tuple[dict, dict, float | None]], new: bool = False) -> list[str]:
+    blocks = [("🆕 " if new else "") + listing_block(*i) for i in items]
+    return split(header("listings", f"{len(items)} {'new ' if new else ''}in Singapore"), blocks,
                  "<blockquote expandable>Asking prices, not sales. 🟢 below and 🔴 above the reference price. "
                  "Paper mode: learn, do not buy yet.</blockquote>")

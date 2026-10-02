@@ -92,3 +92,15 @@ def test_listing_card_marks_below_retail_green_and_escapes():
     out = cards.listings([(l, ref, None)])
     assert len(out) == 1 and "🟢 <i>▼12% vs retail</i>" in out[0] and "Sub &lt;x&gt;" in out[0]
     assert 'href="https://a.sg/?a=1&amp;b=2"' in out[0] and "<i>from search</i>" in out[0]
+    assert "🛒 <a" in out[0] and "Buy at a.sg</a>" in out[0] and "🏠 a.sg" in out[0]
+
+
+def test_new_finds_alert_once_and_skip_deals(s, db, lim):
+    from watchbot.serve import new_finds
+    refs.seed(db, s)
+    add_listing(db, "126610LN", 16000, "a")
+    add_listing(db, "126300", 12000, "b")
+    db.execute("INSERT INTO deals(listing_id) SELECT id FROM listings WHERE source_id='b'")
+    out = new_finds(X(s, db, lim))
+    assert len(out) == 1 and "🆕" in out[0] and "126610LN" in out[0] and "126300" not in out[0]
+    assert new_finds(X(s, db, lim)) == []
