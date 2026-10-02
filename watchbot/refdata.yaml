@@ -1,0 +1,151 @@
+# Facts and Singapore retail prices for the starter watchlist, verified during the build on 2026-10-02.
+# retail_confidence: "search" means the figure was read from a search result quoting the page, not from an
+# opened page, because the build environment could not open brand sites. retail.py refreshes each figure from
+# retail_url on the NAS (robots.txt and terms permitting) and replaces it, with the new date, when it parses one.
+# A null retail_sgd prints as "unknown". Nothing here is estimated.
+# aliases: other ways sellers write the reference; matching ignores spaces, dots and dashes.
+
+"126610LN":
+  brand: Rolex
+  model: Submariner Date
+  aliases: ["126610 LN", "M126610LN"]
+  facts: {movement: "calibre 3235, automatic, in house", case_mm: 41, material: Oystersteel, status: current, variant: "black dial, 0001", service_years: 10}
+  retail_sgd: 15950
+  retail_url: https://www.rolex.com/en-sg/watches/submariner/m126610ln-0001
+  retail_date: "2026-10-02"
+  retail_confidence: search
+"124300":
+  brand: Rolex
+  model: Oyster Perpetual 41
+  aliases: ["M124300"]
+  facts: {movement: "calibre 3230, automatic, in house", case_mm: 41, material: Oystersteel, status: "discontinued, replaced by 134300 in 2026", successor: "134300", service_years: 10}
+  retail_sgd: null
+  retail_url: null
+  retail_date: null
+  retail_confidence: none
+  retail_note: "no longer on rolex.com; the successor 134300 lists at S$9,900 (from search, 2026-10-02)"
+"126300":
+  brand: Rolex
+  model: Datejust 41
+  aliases: ["M126300"]
+  facts: {movement: "calibre 3235, automatic, in house", case_mm: 41, material: Oystersteel, status: current, variant: "smooth bezel, Oyster bracelet, 0011 bright black", service_years: 10}
+  retail_sgd: 12550
+  retail_url: https://www.rolex.com/en-sg/watches/datejust/m126300-0011
+  retail_date: "2026-10-02"
+  retail_confidence: search
+  retail_note: "dial and bracelet variants run about S$12,550 to S$12,900"
+"126710BLNR":
+  brand: Rolex
+  model: GMT Master II
+  aliases: ["M126710BLNR", "126710 BLNR"]
+  facts: {movement: "calibre 3285, automatic, in house", case_mm: 40, material: Oystersteel, status: current, variant: "Jubilee bracelet, 0002", service_years: 10}
+  retail_sgd: 16900
+  retail_url: https://www.rolex.com/en-sg/watches/gmt-master-ii/m126710blnr-0002
+  retail_date: "2026-10-02"
+  retail_confidence: search
+  retail_note: "Oyster bracelet 0003 SG price not found"
+"M79030N":
+  brand: Tudor
+  model: Black Bay 58
+  aliases: ["79030N", "M79030N-0001", "M79030N-0002"]
+  facts: {movement: "MT5402, automatic, in house", case_mm: 39, material: steel, status: "discontinued, replaced by M7939A1A0NU in 2026", successor: "M7939A1A0NU-0001", service_years: 10}
+  retail_sgd: null
+  retail_url: null
+  retail_date: null
+  retail_confidence: none
+  retail_note: "successor lists at S$6,990 at The Hour Glass (from search, 2026-10-02)"
+"M25407N":
+  brand: Tudor
+  model: Pelagos 39
+  aliases: ["25407N", "M25407N-0001"]
+  facts: {movement: "MT5400, automatic, in house", case_mm: 39, material: titanium, status: current, service_years: 10}
+  retail_sgd: 7370
+  retail_url: https://www.thehourglass.com/product/tudor/in-store/pelagos-39/m25407n-0001
+  retail_date: "2026-10-02"
+  retail_confidence: search
+  retail_note: "authorised retailer page; tudorwatch.com shows no SGD price"
+"310.30.42.50.01.001":
+  brand: Omega
+  model: Speedmaster Moonwatch Professional
+  aliases: ["31030425001001", "310.30.42.50.01.001"]
+  facts: {movement: "calibre 3861, manual winding, in house", case_mm: 42, material: steel, status: current, variant: "Hesalite crystal, steel bracelet", service_years: 8}
+  retail_sgd: 9450
+  retail_url: https://www.sincerewatch.com/brand/watches/omega/omega-speedmaster/moonwatch-professional-310-30-42-50-01-001/
+  retail_date: "2026-10-02"
+  retail_confidence: search
+  retail_note: "authorised retailer page, may be stale"
+"210.30.42.20.01.001":
+  brand: Omega
+  model: Seamaster Diver 300M
+  aliases: ["21030422001001"]
+  facts: {movement: "calibre 8800, automatic, in house", case_mm: 42, material: steel, status: current, variant: "black ceramic dial", service_years: 8}
+  retail_sgd: 8600
+  retail_url: https://www.sincerewatch.com/brand/watches/omega/omega-seamaster/seamaster-diver-300m-21030422001001/
+  retail_date: "2026-10-02"
+  retail_confidence: search
+  retail_note: "authorised retailer page"
+"220.10.41.21.03.001":
+  brand: Omega
+  model: Aqua Terra 150M 41
+  aliases: ["22010412103001"]
+  facts: {movement: "calibre 8900, automatic, in house", case_mm: 41, material: steel, status: "unclear, may be discontinued", variant: "blue dial, steel bracelet", service_years: 8}
+  retail_sgd: null
+  retail_url: null
+  retail_date: null
+  retail_confidence: none
+"WSSA0029":
+  brand: Cartier
+  model: Santos Medium
+  aliases: ["CRWSSA0029"]
+  facts: {movement: "calibre 1847 MC, automatic, in house", case_mm: 35.1, material: steel, status: current, service_years: 7}
+  retail_sgd: 11200
+  retail_url: https://www.cartier.com/en-sg/watches/collections/santos-de-cartier/santos-de-cartier-watch-CRWSSA0029
+  retail_date: "2026-10-02"
+  retail_confidence: search
+"WSTA0041":
+  brand: Cartier
+  model: Tank Must Large
+  aliases: ["CRWSTA0041"]
+  facts: {movement: "high autonomy quartz", case_mm: "33.7 by 25.5", material: steel, status: current, service_years: 7}
+  retail_sgd: 5000
+  retail_url: null
+  retail_date: "2026-10-02"
+  retail_confidence: search
+  retail_note: "figure from the older cartier.sg product page (full URL not captured), may be stale; set retail_url by hand"
+"SBGA211":
+  brand: Grand Seiko
+  model: Snowflake
+  aliases: ["SBGA211G"]
+  facts: {movement: "9R65 Spring Drive, in house", case_mm: 41, material: titanium, status: current, service_years: 5}
+  retail_sgd: 8700
+  retail_url: https://www.grand-seiko.com/sg-en/collections/sbga211g
+  retail_date: "2026-10-02"
+  retail_confidence: search
+"IW371605":
+  brand: IWC
+  model: Portugieser Chronograph
+  aliases: ["IW3716-05"]
+  facts: {movement: "calibre 69355, automatic, in house", case_mm: 41, material: steel, status: current, variant: "silver dial, blue hands", service_years: 5}
+  retail_sgd: 12600
+  retail_url: https://www.iwc.com/sg/en/watch-collections/portugieser/iw371605-portugieser-chronograph.html
+  retail_date: "2026-10-02"
+  retail_confidence: search
+"L3.802.4.63.6":
+  brand: Longines
+  model: Spirit Zulu Time 39
+  aliases: ["L38024636"]
+  facts: {movement: "L844.4 GMT, automatic, silicon hairspring", case_mm: 39, material: steel, status: current, service_years: 5}
+  retail_sgd: null
+  retail_url: https://www.longines.com/en-sg/p/watch-longines-spirit-l3-802-4-63-6
+  retail_date: null
+  retail_confidence: none
+  retail_note: "4,790 seen in search but the currency was unclear, so it is not used until retail.py reads the page"
+"CBS2210.FC6534":
+  brand: TAG Heuer
+  model: Carrera Chronograph 39
+  aliases: ["CBS2210FC6534"]
+  facts: {movement: "TH20 00, automatic, in house", case_mm: 39, material: steel, status: current, variant: "black dial, leather strap", service_years: 5}
+  retail_sgd: 9900
+  retail_url: https://www.tagheuer.com/sg/en/timepieces/collections/tag-heuer-carrera/39-mm-th20-00/CBS2210.FC6534.html
+  retail_date: "2026-10-02"
+  retail_confidence: search

@@ -1,0 +1,355 @@
+{
+ "href": "https://api.ebay.com/buy/browse/v1/item_summary/search?q=Rolex+126610LN&limit=200&offset=0",
+ "total": 8,
+ "limit": 200,
+ "offset": 0,
+ "itemSummaries": [
+  {
+   "itemId": "v1|100000000001|0",
+   "legacyItemId": "100000000001",
+   "title": "Rolex Submariner Date 126610LN Black Full Set 2022 Box and Papers",
+   "price": {
+    "value": "15800.00",
+    "currency": "SGD"
+   },
+   "conditionId": "3000",
+   "condition": "Pre-owned",
+   "itemLocation": {
+    "city": "Singapore",
+    "postalCode": "0***",
+    "country": "SG"
+   },
+   "seller": {
+    "username": "seller1",
+    "feedbackPercentage": "99.6",
+    "feedbackScore": 512
+   },
+   "shippingOptions": [
+    {
+     "shippingCostType": "FIXED",
+     "shippingCost": {
+      "value": "0.00",
+      "currency": "SGD"
+     }
+    }
+   ],
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "itemWebUrl": "https://www.ebay.com.sg/itm/100000000001",
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/images/g/1/s-l1600.jpg"
+   },
+   "additionalImages": [
+    {
+     "imageUrl": "https://i.ebayimg.com/images/g/1b/s-l1600.jpg"
+    }
+   ],
+   "shortDescription": "Excellent condition, full set"
+  },
+  {
+   "itemId": "v1|100000000002|0",
+   "legacyItemId": "100000000002",
+   "title": "Rolex Submariner 126610LN watch only 2021",
+   "price": {
+    "value": "14200.00",
+    "currency": "SGD"
+   },
+   "conditionId": "3000",
+   "condition": "Pre-owned",
+   "itemLocation": {
+    "city": "Singapore",
+    "postalCode": "0***",
+    "country": "SG"
+   },
+   "seller": {
+    "username": "seller2",
+    "feedbackPercentage": "100.0",
+    "feedbackScore": 3
+   },
+   "shippingOptions": [
+    {
+     "shippingCostType": "FIXED",
+     "shippingCost": {
+      "value": "0.00",
+      "currency": "SGD"
+     }
+    }
+   ],
+   "buyingOptions": [
+    "FIXED_PRICE",
+    "BEST_OFFER"
+   ],
+   "itemWebUrl": "https://www.ebay.com.sg/itm/100000000002",
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/images/g/2/s-l1600.jpg"
+   },
+   "additionalImages": [
+    {
+     "imageUrl": "https://i.ebayimg.com/images/g/2b/s-l1600.jpg"
+    }
+   ],
+   "shortDescription": ""
+  },
+  {
+   "itemId": "v1|100000000003|0",
+   "legacyItemId": "100000000003",
+   "title": "Rolex Submariner Date 126610LV Starbucks Green",
+   "price": {
+    "value": "17500.00",
+    "currency": "SGD"
+   },
+   "conditionId": "3000",
+   "condition": "Pre-owned",
+   "itemLocation": {
+    "city": "Singapore",
+    "postalCode": "0***",
+    "country": "SG"
+   },
+   "seller": {
+    "username": "seller3",
+    "feedbackPercentage": "99.6",
+    "feedbackScore": 512
+   },
+   "shippingOptions": [
+    {
+     "shippingCostType": "FIXED",
+     "shippingCost": {
+      "value": "0.00",
+      "currency": "SGD"
+     }
+    }
+   ],
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "itemWebUrl": "https://www.ebay.com.sg/itm/100000000003",
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/images/g/3/s-l1600.jpg"
+   },
+   "additionalImages": [
+    {
+     "imageUrl": "https://i.ebayimg.com/images/g/3b/s-l1600.jpg"
+    }
+   ],
+   "shortDescription": ""
+  },
+  {
+   "itemId": "v1|100000000004|0",
+   "legacyItemId": "100000000004",
+   "title": "Rolex 126610LN Submariner Date Unworn 2024 BNIB",
+   "price": {
+    "value": "17900.00",
+    "currency": "SGD"
+   },
+   "conditionId": "1000",
+   "condition": "New",
+   "itemLocation": {
+    "city": "Singapore",
+    "postalCode": "0***",
+    "country": "SG"
+   },
+   "seller": {
+    "username": "seller4",
+    "feedbackPercentage": "99.6",
+    "feedbackScore": 512,
+    "sellerAccountType": "BUSINESS"
+   },
+   "shippingOptions": [
+    {
+     "shippingCostType": "FIXED",
+     "shippingCost": {
+      "value": "0.00",
+      "currency": "SGD"
+     }
+    }
+   ],
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "itemWebUrl": "https://www.ebay.com.sg/itm/100000000004",
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/images/g/4/s-l1600.jpg"
+   },
+   "additionalImages": [
+    {
+     "imageUrl": "https://i.ebayimg.com/images/g/4b/s-l1600.jpg"
+    }
+   ],
+   "shortDescription": ""
+  },
+  {
+   "itemId": "v1|100000000005|0",
+   "legacyItemId": "100000000005",
+   "title": "Rolex Submariner 126610LN Malaysia stock",
+   "price": {
+    "value": "15000.00",
+    "currency": "SGD"
+   },
+   "conditionId": "3000",
+   "condition": "Pre-owned",
+   "itemLocation": {
+    "city": "Kuala Lumpur",
+    "postalCode": "0***",
+    "country": "MY"
+   },
+   "seller": {
+    "username": "seller5",
+    "feedbackPercentage": "99.6",
+    "feedbackScore": 512
+   },
+   "shippingOptions": [
+    {
+     "shippingCostType": "FIXED",
+     "shippingCost": {
+      "value": "0.00",
+      "currency": "SGD"
+     }
+    }
+   ],
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "itemWebUrl": "https://www.ebay.com.sg/itm/100000000005",
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/images/g/5/s-l1600.jpg"
+   },
+   "additionalImages": [
+    {
+     "imageUrl": "https://i.ebayimg.com/images/g/5b/s-l1600.jpg"
+    }
+   ],
+   "shortDescription": ""
+  },
+  {
+   "itemId": "v1|100000000006|0",
+   "legacyItemId": "100000000006",
+   "title": "Rolex Submariner 126610LN for parts",
+   "price": {
+    "value": "6000.00",
+    "currency": "SGD"
+   },
+   "conditionId": "7000",
+   "condition": "For parts or not working",
+   "itemLocation": {
+    "city": "Singapore",
+    "postalCode": "0***",
+    "country": "SG"
+   },
+   "seller": {
+    "username": "seller6",
+    "feedbackPercentage": "99.6",
+    "feedbackScore": 512
+   },
+   "shippingOptions": [
+    {
+     "shippingCostType": "FIXED",
+     "shippingCost": {
+      "value": "0.00",
+      "currency": "SGD"
+     }
+    }
+   ],
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "itemWebUrl": "https://www.ebay.com.sg/itm/100000000006",
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/images/g/6/s-l1600.jpg"
+   },
+   "additionalImages": [
+    {
+     "imageUrl": "https://i.ebayimg.com/images/g/6b/s-l1600.jpg"
+    }
+   ],
+   "shortDescription": ""
+  },
+  {
+   "itemId": "v1|100000000007|0",
+   "legacyItemId": "100000000007",
+   "title": "Rolex Submariner Date 126610 LN 2020 B&P",
+   "price": {
+    "value": "15100.00",
+    "currency": "SGD"
+   },
+   "conditionId": "2990",
+   "condition": "Pre-owned - Excellent",
+   "itemLocation": {
+    "city": "Singapore",
+    "postalCode": "0***",
+    "country": "SG"
+   },
+   "seller": {
+    "username": "seller7",
+    "feedbackPercentage": "99.6",
+    "feedbackScore": 512
+   },
+   "shippingOptions": [
+    {
+     "shippingCostType": "FIXED",
+     "shippingCost": {
+      "value": "0.00",
+      "currency": "SGD"
+     }
+    }
+   ],
+   "buyingOptions": [
+    "AUCTION"
+   ],
+   "itemWebUrl": "https://www.ebay.com.sg/itm/100000000007",
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/images/g/7/s-l1600.jpg"
+   },
+   "additionalImages": [
+    {
+     "imageUrl": "https://i.ebayimg.com/images/g/7b/s-l1600.jpg"
+    }
+   ],
+   "shortDescription": "",
+   "itemEndDate": "2026-10-05T12:00:00.000Z"
+  },
+  {
+   "itemId": "v1|100000000008|0",
+   "legacyItemId": "100000000008",
+   "title": "Rolex Submariner 126610LN US seller",
+   "price": {
+    "value": "11000.00",
+    "currency": "USD"
+   },
+   "conditionId": "3000",
+   "condition": "Pre-owned",
+   "itemLocation": {
+    "city": "New York",
+    "postalCode": "0***",
+    "country": "US"
+   },
+   "seller": {
+    "username": "seller8",
+    "feedbackPercentage": "99.6",
+    "feedbackScore": 512
+   },
+   "shippingOptions": [
+    {
+     "shippingCostType": "FIXED",
+     "shippingCost": {
+      "value": "0.00",
+      "currency": "USD"
+     }
+    }
+   ],
+   "buyingOptions": [
+    "FIXED_PRICE"
+   ],
+   "itemWebUrl": "https://www.ebay.com.sg/itm/100000000008",
+   "image": {
+    "imageUrl": "https://i.ebayimg.com/images/g/8/s-l1600.jpg"
+   },
+   "additionalImages": [
+    {
+     "imageUrl": "https://i.ebayimg.com/images/g/8b/s-l1600.jpg"
+    }
+   ],
+   "shortDescription": ""
+  }
+ ]
+}

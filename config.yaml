@@ -1,0 +1,119 @@
+# watchbot settings. Secrets live in .env, fees and rates with their sources live in rules.yaml.
+me:
+  country: SG
+  currency: SGD
+  budget_max_sgd: 15000
+  min_net_margin_pct: 8          # after all costs
+  min_net_profit_sgd: 500
+  hold_days_target: 60
+  sell_channel: [local_private, consignment, dealer_buyback, online_platform]
+  experience: beginner
+  watchlist_refs: []             # empty means the starter list below
+  brands: [Rolex, Omega, Tudor, Cartier, Grand Seiko, TAG Heuer, Longines, IWC, Patek Philippe, Audemars Piguet]
+  paper_mode: true
+  paper_min_trades: 10
+  paper_override: false          # only you set this; lets paper_mode go false before paper_min_trades have closed
+
+starter_watchlist:
+  - {brand: Rolex, model: Submariner Date, ref: "126610LN"}
+  - {brand: Rolex, model: Oyster Perpetual 41, ref: "124300"}
+  - {brand: Rolex, model: Datejust 41, ref: "126300"}
+  - {brand: Rolex, model: GMT Master II, ref: "126710BLNR"}
+  - {brand: Tudor, model: Black Bay 58, ref: "M79030N"}
+  - {brand: Tudor, model: Pelagos 39, ref: "M25407N"}
+  - {brand: Omega, model: Speedmaster Moonwatch Professional, ref: "310.30.42.50.01.001"}
+  - {brand: Omega, model: Seamaster Diver 300M, ref: "210.30.42.20.01.001"}
+  - {brand: Omega, model: Aqua Terra 150M 41, ref: "220.10.41.21.03.001"}
+  - {brand: Cartier, model: Santos Medium, ref: "WSSA0029"}
+  - {brand: Cartier, model: Tank Must Large, ref: "WSTA0041"}
+  - {brand: Grand Seiko, model: Snowflake, ref: "SBGA211"}
+  - {brand: IWC, model: Portugieser Chronograph, ref: "IW371605"}
+  - {brand: Longines, model: Spirit Zulu Time 39, ref: "L3.802.4.63.6"}
+  - {brand: TAG Heuer, model: Carrera Chronograph 39, ref: "CBS2210.FC6534"}
+
+telegram:
+  chat_id: "@your_channel"       # TELEGRAM_CHAT_ID in .env overrides
+  owner_user_id: 0               # your Telegram user id; private chat commands answer only you
+  admin_chat_id: ""              # private chat for alerts, never the channel
+  replace_previous_deals: true
+
+schedule:
+  timezone: Asia/Singapore
+  collect_cron: "0 6 * * *"
+  lesson_cron: "0 8 * * *"
+  deals_cron: "30 8 * * *"
+  profile_cron: "30 12 * * *"
+  moves_cron: "30 18 * * *"
+  paper_report_cron: "0 20 * * 0"
+
+run:
+  deals_per_day: 10
+  move_alert_pct: 5
+  min_comparables: 5
+  asking_to_sale_discount: 0.95
+  too_good_pct: 30
+  stop_loss_pct: 10
+  quick_sale_discount_pct: 5
+  service_age_years: 6
+  comparables_days: 30           # window of asking prices for market value
+  trim_pct: 10                   # trimmed median drops this share at each end
+  ended_after_missed_runs: 2     # a listing missing from this many complete collects in a row has ended
+  max_run_minutes: 90
+
+costs:
+  insurance_pct: 1.0             # insured courier when not collected in person
+  payment_fee_pct: 1.0
+  authentication_sgd: 150
+  service_reserve_sgd: {Rolex: 1200, Omega: 900, Tudor: 700, Cartier: 800, Grand Seiko: 800, default: 600}
+  sell_fees_pct: {local_private: 0, consignment: 15, dealer_buyback: 0, online_platform: 7}   # sources in rules.yaml
+  dealer_buyback_discount_pct: 15   # dealers pay below market
+  local_delivery_sgd: 25
+
+limits:
+  web:
+    per_domain_min_gap_seconds: 8
+    per_domain_max_gap_seconds: 15
+    max_requests_per_day: 120
+    chrono24_pages_per_day: 20
+    domain_cooldown_hours: 24
+    respect_robots_txt: true
+    user_agent: "watchbot/1.0 (personal research, low volume)"
+    timeout_seconds: 25
+    max_bytes: 2000000
+    page_cache_hours: 20         # a page fetched this recently is served from the cache, no request
+    failures_before_cooldown: 3
+  daily_calls_ebay: 1000
+  ebay_min_gap_seconds: 1.0
+  daily_calls_watchcharts: 100
+  daily_calls_fx: 4
+  telegram: {min_gap_seconds: 3.5, max_per_minute: 17, max_retry_after_seconds: 900}
+  claude: {max_calls_per_day: 6}
+
+claude:
+  binary: claude
+  model: sonnet
+  fallback_model: haiku
+  max_retries: 2                 # CLAUDE_CODE_MAX_RETRIES
+  timeout_seconds: 900
+  discover_max_turns: 40
+  write_max_turns: 3
+
+never_fetch_domains: [carousell.sg, carousell.com, facebook.com, instagram.com, reddit.com, xiaohongshu.com]
+
+sources:
+  sg_dealers: {enabled: true}
+  ebay: {enabled: true, item_location: SG, marketplace_id: EBAY_SG, category_id: "31387", page_size: 200}
+  chrono24: {enabled: true, seller_country: SG}
+  watchcharts: {enabled: false}
+  fx: {url: "https://api.frankfurter.dev/v1/latest", currencies: [USD, EUR, HKD, CHF, GBP, JPY, MYR, AUD]}
+
+region:
+  country: SG
+  allowed_tlds: [.sg]
+  allow_non_sg_domains_only_for_sg_sellers: true
+
+vault:
+  path: /vault
+  folder: Watchbot
+  host_path: /volume1/obsidian/MainVault
+  chart_days: 90

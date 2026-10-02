@@ -1,0 +1,17 @@
+[project]
+name = "watchbot"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["pyyaml", "httpx", "apscheduler>=3.10,<4", "tzdata", "pandas", "selectolax", "lxml", "beautifulsoup4"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+watchbot = "watchbot.cli:main"
+
+[tool.setuptools]
+packages = ["watchbot", "watchbot.sources"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

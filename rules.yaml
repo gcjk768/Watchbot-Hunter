@@ -1,0 +1,84 @@
+# Fees, rates and source terms, each with where it came from and when it was checked.
+# Checked 2026-10-02 during the build. The build environment could not open most of these pages directly
+# (egress blocked), so entries marked "from search" were read from search result summaries and must be
+# rechecked by hand. Rows the bot writes to the rules table at runtime are kept alongside these.
+
+tax:
+  gst_rate_pct:
+    value: 9
+    url: https://www.iras.gov.sg/taxes/goods-services-tax-(gst)/gst-rate-change/gst-rate-change-for-consumers1
+    checked: 2026-10-02
+    note: from search. GST is 9 percent from 1 January 2024. Most Singapore price tags already include it.
+  gst_registration_threshold_sgd:
+    value: 1000000
+    url: https://www.iras.gov.sg/taxes/goods-services-tax-(gst)/gst-registration-deregistration/do-i-need-to-register-for-gst
+    checked: 2026-10-02
+    note: from search. A business must register above S$1 million taxable turnover a year. Only a GST registered dealer may add GST.
+  trading_income:
+    url: https://www.iras.gov.sg/taxes/individual-income-tax/self-employed-and-partnerships/tax-obligations-by-industry-trade-or-profession/tax-guide-for-online-sellers-and-service-providers
+    checked: 2026-10-02
+    note: from search. Income from activities done repeatedly in an organised way for profit is taxable; IRAS uses the badges of trade. Confirm on iras.gov.sg.
+
+sell_channels:
+  local_private:
+    fee_pct: 0
+    note: Carousell personal accounts pay no selling fee; a professional account pays 2.5 percent per chat transaction capped at S$30.
+    url: https://support.carousell.com/hc/en-us/articles/16779613754009
+    checked: 2026-10-02
+  consignment:
+    fee_pct: 15
+    note: typical Singapore dealer consignment commission; varies by shop, ask before you consign.
+    url: null
+    checked: 2026-10-02
+  dealer_buyback:
+    fee_pct: 0
+    note: no fee, but dealers pay below market, see costs.dealer_buyback_discount_pct.
+    url: null
+    checked: 2026-10-02
+  online_platform:
+    fee_pct: 7
+    note: Chrono24 private seller commission 6.5 percent (from search); eBay Singapore lists no final value fee on its old fee page but payment processing applies. 7 covers the higher of the two.
+    url: https://www.chrono24.com/info/faqs.htm
+    checked: 2026-10-02
+
+sources:
+  ebay:
+    verdict: allowed
+    why: official Browse API with an app key. EBAY_SG is a supported marketplace for item_summary/search. Default limit 5000 calls a day.
+    url: https://developer.ebay.com/api-docs/buy/static/ref-marketplace-supported.html
+    checked: 2026-10-02
+    sold_prices: Marketplace Insights is a limited release API; not assumed. Ended listings are labelled likely sold, never sold.
+  chrono24:
+    verdict: unverified
+    why: robots.txt and the terms clause on automated access could not be read from the build environment. Bot detection is in place. Until you read the terms and set verdict to allowed, Chrono24 is used only through discovery snippets labelled from search.
+    url: https://www.chrono24.com/robots.txt
+    checked: 2026-10-02
+  carousell:
+    verdict: forbidden
+    why: Carousell's Terms of Service forbid any scraper, robot, bot, spider, crawler or other automated means to access any portion of the Services (from search). So the bot never fetches carousell.sg, not even a single listing you send; it reads the text or screenshot you send instead.
+    url: https://support.carousell.com/hc/en-us/articles/115011881808-Terms-of-Service
+    checked: 2026-10-02
+  watchcharts_site:
+    verdict: forbidden
+    why: website terms limit data to personal use and to means intentionally made available; the paid API is the allowed route.
+    url: https://watchcharts.com/about/terms
+    checked: 2026-10-02
+  watchcharts_api:
+    verdict: allowed
+    why: paid licence; public aggregation of datasets is prohibited, so the bot keeps WatchCharts figures in your private channel and vault only.
+    url: https://watchcharts.com/api
+    checked: 2026-10-02
+
+# Singapore pre owned dealers that show prices. The bot checks robots.txt itself every day.
+# terms: allowed means you read the site's terms and they do not forbid automated access. Until then
+# (unverified) the bot does not fetch the dealer, and its listings arrive only through discovery.
+sg_dealers:
+  watchexchange.sg:  {name: Watch Exchange, quality: 0.8, terms: unverified, gst_registered: null, note: Far East Plaza, 12 month in house warranty}
+  watchbook.sg:      {name: Watchbook, quality: 0.8, terms: unverified, gst_registered: null, note: Far East Plaza, 1 year warranty}
+  horologymaison.com: {name: Times Avenue by Horology Maison, quality: 0.7, terms: unverified, gst_registered: null, note: Singapore dealer on a .com domain}
+  thefinesttime.com: {name: The Finest Time, quality: 0.6, terms: unverified, gst_registered: null, note: Singapore dealer on a .com domain}
+  houseofwatches.sg: {name: House of Watches, quality: 0.6, terms: unverified, gst_registered: null, note: ""}
+  kimwatch.sg:       {name: Kim Watch, quality: 0.6, terms: unverified, gst_registered: null, note: ""}
+  jpendulum.com:     {name: J Pendulum, quality: 0.6, terms: unverified, gst_registered: null, note: Singapore dealer on a .com domain}
+  maxi-cash.com:     {name: MaxiCash, quality: 0.7, terms: unverified, gst_registered: null, note: listed pawnbroker and pre loved retailer}
+  thehourglass.com:  {name: The Hour Glass, quality: 0.95, terms: unverified, gst_registered: true, note: authorised retailer; Rolex Certified Pre Owned}
