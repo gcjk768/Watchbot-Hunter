@@ -1,0 +1,1 @@
+{"type": "object", "properties": {"title": {"type": "string", "maxLength": 90}, "body": {"type": "string", "maxLength": 700}, "action": {"type": "string", "maxLength": 200}}, "required": ["title", "body", "action"]}
