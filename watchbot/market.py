@@ -83,8 +83,6 @@ def find_deals(s, db, mv: dict[str, dict]) -> list[dict]:
         for l in db.execute("SELECT * FROM listings WHERE ref=? AND ended_at IS NULL AND price_sgd>0 "
                             "AND last_seen>=date('now', '-3 day')", (r["ref"],)):
             l = dict(l)
-            if l["price_sgd"] > s.me.budget_max_sgd:
-                continue
             e = evaluate(s, l, r, m["value"])
             if e["net"] >= s.me.min_net_profit_sgd and e["margin_pct"] >= s.me.min_net_margin_pct:
                 out.append({"listing": l, "ref": r, "market": m["value"], **e})

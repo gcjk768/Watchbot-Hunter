@@ -5,6 +5,8 @@ updated: 2026-10-03
 # Changelog
 
 ## 2026-10-03
+- feat: watchlist 38 → 66: 15 more appreciation candidates + 13 popular-in-SG refs (Datejust fluted, OP36, Yacht-Master, Calatrava, BB58 GMT, Panerai, Hublot, Big Pilot); brands + Panerai, Hublot
+- feat: no price cap (removed `me.budget_max_sgd` and its filter in `watchbot/market.py`); watchlist 15 → 38 refs, adding 23 appreciation candidates (Rolex sports, Patek Nautilus/Aquanaut, AP Royal Oak, VC Overseas, Lange Odysseus, Snoopy, BB58 Bronze) in `config.yaml`; seeded into the live DB on the next collect
 - feat: cards follow the SG car tracker layout (`watchbot/cards.py`): numbered `emoji n. <a>Name</a> · ref 🆕 NEW` heads, dot-joined lines, `$` money, ▲/▼ deltas, notes collapsed last; 🔄 Run again / 💎 Deals / 📈 Market buttons; `/watchlistings`
 - fix: discovery keeps a listing only when its URL names the reference and is not another country's locale (`buyable` in `watchbot/ai.py`); haiku returned category pages and en-MY/en-VN pages
 - operating hours 05:00 to 21:00 SGT, avoiding the trading desk US session; discovery 5x/day, claude cap 8

@@ -21,6 +21,7 @@ New finds post the moment a job sees them (inside operating hours): 💎 deal ca
 `/watchhelp /watchlistings /watchmarket /watchdeals /watchlist /watchadd REF Brand Model /watchdel REF /watchstatus`. Buttons (last message): 🔄 Run again (/watchlistings), 💎 Deals, 📈 Market; whitelist is those plus status. Message layout copies @owner_sgcar_bot (`watchbot/cards.py`).
 
 ## Deal maths (`watchbot/market.py`)
+No price cap. Watchlist (`config.yaml` `starter_watchlist`) = 66 refs: 15 learning, 38 appreciation candidates (trade at/above retail), 13 popular in SG (hold value).
 Market = trimmed median of 30-day SG asks × 0.95; needs ≥5 asks ("thin" otherwise, never a deal). Landed = price + delivery + payment + insurance + authentication + service reserve. Best exit channel from `config.yaml` `costs`. Deal = net ≥ S$500 and margin ≥ 8%; each listing alerts once (`deals` table).
 
 ## Test
