@@ -71,8 +71,10 @@ def build_cmd(s, system_file: str, schema: dict, *, web: bool, max_turns: int, m
     c = s.claude
     cmd = [c.binary, "-p", "--output-format", "json", "--json-schema", json.dumps(schema),
            "--permission-mode", "dontAsk", "--permission-prompts", "none", "--strict-mcp-config",
-           "--no-session-persistence", "--model", model or c.model, "--fallback-model", c.fallback_model,
+           "--no-session-persistence", "--model", model or c.model,
            "--max-turns", str(max_turns), "--append-system-prompt-file", system_file]
+    if c.fallback_model != (model or c.model):   # the CLI refuses a fallback equal to the main model
+        cmd += ["--fallback-model", c.fallback_model]
     if web:
         cmd += ["--allowedTools", "WebSearch,WebFetch", "--disallowedTools", DISCOVER_DISALLOWED]
     else:
@@ -93,11 +95,10 @@ def single_flight(path: Path):
 
 
 def call(s, lim: Limiter, system_file: str, stdin: dict | str, schema: dict, *, web: bool = False,
-         max_turns: int | None = None, runner=subprocess.run) -> dict:
+         max_turns: int | None = None, model: str | None = None, runner=subprocess.run) -> dict:
     """One call; on a Sonnet or Opus limit, one retry on the fallback model. Raises ClaudeFailure."""
     turns = max_turns or (s.claude.discover_max_turns if web else s.claude.write_max_turns)
     payload = stdin if isinstance(stdin, str) else json.dumps(stdin, ensure_ascii=False)
-    model = None
     for attempt in (1, 2):
         try:
             lim.acquire_claude()

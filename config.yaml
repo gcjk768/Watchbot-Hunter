@@ -33,21 +33,19 @@ starter_watchlist:
 
 telegram:
   chat_id: "@your_channel"       # TELEGRAM_CHAT_ID in .env overrides
-  owner_user_id: 0               # your Telegram user id; private chat commands answer only you
+  thread_id: null                # forum topic id; TELEGRAM_THREAD_ID in .env overrides
+  owner_user_id: 0               # your Telegram user id; commands answer only you
   admin_chat_id: ""              # private chat for alerts, never the channel
-  replace_previous_deals: true
 
 schedule:
   timezone: Asia/Singapore
-  collect_cron: "0 6 * * *"
+  collect_cron: "7 * * * *"      # hourly eBay collect, then a card for new deals only
+  discover_cron: "30 6 * * *"    # one claude -p web search for Singapore listings and news
   lesson_cron: "0 8 * * *"
-  deals_cron: "30 8 * * *"
-  profile_cron: "30 12 * * *"
-  moves_cron: "30 18 * * *"
-  paper_report_cron: "0 20 * * 0"
+  market_cron: "30 8 * * *"      # daily market card for the watchlist
 
 run:
-  deals_per_day: 10
+  deals_per_alert: 10
   move_alert_pct: 5
   min_comparables: 5
   asking_to_sale_discount: 0.95
@@ -91,8 +89,9 @@ limits:
 
 claude:
   binary: claude
-  model: sonnet
-  fallback_model: haiku
+  model: haiku                   # lessons; cheap by fleet policy
+  fallback_model: sonnet
+  discover_model: sonnet         # web search needs the stronger model
   max_retries: 2                 # CLAUDE_CODE_MAX_RETRIES
   timeout_seconds: 900
   discover_max_turns: 40
@@ -111,9 +110,3 @@ region:
   country: SG
   allowed_tlds: [.sg]
   allow_non_sg_domains_only_for_sg_sellers: true
-
-vault:
-  path: /vault
-  folder: Watchbot
-  host_path: /volume1/obsidian/MainVault
-  chart_days: 90

@@ -1,0 +1,85 @@
+import json
+from datetime import date
+
+from watchbot import cards, market, refs
+from watchbot.serve import Bot
+
+
+def add_listing(db, ref, price, sid, **kw):
+    today = date.today().isoformat()
+    db.execute("INSERT INTO listings(source, source_id, ref, title, price, currency, price_sgd, first_seen, last_seen, "
+               "raw_json, year, full_set, seller_type, feedback_json, url) VALUES('ebay',?,?,?,?,'SGD',?,?,?,?,?,?,?,?,?)",
+               (sid, ref, "t", price, price, today, today, json.dumps(kw.get("raw", {})), kw.get("year", 2023),
+                kw.get("full_set", 1), kw.get("seller_type", "dealer"), "{}", "https://www.ebay.com.sg/itm/1"))
+
+
+def test_trimmed_median_drops_outliers():
+    assert market.trimmed_median([1, 100, 101, 102, 10_000], 20) == 101
+
+
+def test_values_label_and_deal_maths(s, db):
+    refs.seed(db, s)
+    for i, p in enumerate([16000, 16500, 17000, 17500, 18000]):
+        add_listing(db, "126610LN", p, f"a{i}")
+    add_listing(db, "126610LN", 13000, "cheap")
+    mv = market.values(s, db, date.today().isoformat())
+    m = mv["126610LN"]
+    assert m["label"] == "market" and m["n"] == 6
+    # 13,000 is ~20% under a ~16,000 market: below too_good_pct (30), so a deal, not a warning
+    ds = market.find_deals(s, db, mv)
+    assert [d["listing"]["source_id"] for d in ds] == ["cheap"]
+    d = ds[0]
+    assert d["landed"] == sum(d["costs"].values()) and d["net"] == d["exit"] - d["landed"]
+    assert not any(f.startswith("too good") for f in d["flags"])
+    # alerted once only
+    assert len(market.new_deals(db, ds, "r1", "2026-10-03")) == 1
+    assert market.new_deals(db, ds, "r2", "2026-10-03") == []
+
+
+def test_thin_market_never_makes_deals(s, db):
+    refs.seed(db, s)
+    add_listing(db, "126610LN", 16000, "a")
+    add_listing(db, "126610LN", 9000, "b")
+    mv = market.values(s, db, date.today().isoformat())
+    assert mv["126610LN"]["label"] == "thin" and market.find_deals(s, db, mv) == []
+
+
+def test_cards_escape_and_split():
+    ref = {"brand": "A<b>", "model": "M&M", "ref": "X1", "retail_sgd": None, "retail_date": None}
+    out = cards.market([ref] * 60, {}, "2026-10-03")
+    assert len(out) > 1 and all(len(t) <= 4096 for t in out)
+    assert "A&lt;b&gt;" in out[0] and "<b>A<b>" not in out[0]
+
+
+class FakeTg:
+    def __init__(self):
+        self.calls = []
+
+    def call(self, method, **kw):
+        self.calls.append(method)
+
+    def send(self, chat, text, **kw):
+        self.calls.append(("send", chat, kw.get("thread_id")))
+
+
+class X:
+    def __init__(self, s, db, lim):
+        self.s, self.db, self.lim, self.tg = s, db, lim, FakeTg()
+
+
+def test_bot_owner_and_topic_only(s, db, lim):
+    s.telegram.owner_user_id, s.telegram.chat_id, s.telegram.thread_id = 7, "-1001", 55
+    bot = Bot(X(s, db, lim))
+    group = {"id": -1001, "type": "supergroup"}
+    assert bot.allowed({"from": {"id": 7}, "chat": {"type": "private"}})
+    assert bot.allowed({"from": {"id": 7}, "chat": group, "message_thread_id": 55})
+    assert not bot.allowed({"from": {"id": 7}, "chat": group, "message_thread_id": 99})   # another bot's topic
+    assert not bot.allowed({"from": {"id": 8}, "chat": {"type": "private"}})
+
+
+def test_callback_whitelist_always_answers(s, db, lim):
+    s.telegram.owner_user_id = 7
+    x = X(s, db, lim)
+    Bot(x).handle({"callback_query": {"id": "q", "data": "watchadd 1 2", "from": {"id": 7},
+                                      "message": {"chat": {"id": 7, "type": "private"}}}})
+    assert x.tg.calls == ["answerCallbackQuery"]   # not whitelisted: answered, nothing run

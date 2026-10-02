@@ -75,8 +75,15 @@ class Telegram:
                 raise TelegramError(f"{method}: {data.get('description', r.status_code)}")
             return data["result"]
 
-    def send(self, chat_id, text: str, reply_to: int | None = None) -> int:
+    def send(self, chat_id, text: str, reply_to: int | None = None, thread_id: int | None = None,
+             buttons: list[tuple[str, str]] | None = None) -> int:
+        """HTML message; on 'can't parse entities' it is resent as plain text so it is never lost.
+        thread_id posts into a forum topic; buttons is one row of (label, callback_data)."""
         extra = {"reply_parameters": {"message_id": reply_to}} if reply_to else {}
+        if thread_id:
+            extra["message_thread_id"] = thread_id
+        if buttons:
+            extra["reply_markup"] = {"inline_keyboard": [[{"text": a, "callback_data": b} for a, b in buttons]]}
         try:
             r = self.call("sendMessage", chat_id=chat_id, text=text, parse_mode="HTML",
                           link_preview_options={"is_disabled": True}, **extra)
@@ -86,6 +93,32 @@ class Telegram:
             r = self.call("sendMessage", chat_id=chat_id, text=html.unescape(re.sub(r"<[^>]+>", "", text)),
                           link_preview_options={"is_disabled": True}, **extra)
         return r["message_id"]
+
+    def post(self, texts: list[str], buttons: list[tuple[str, str]] | None = None) -> list[int]:
+        """Send a multi message report to the bot's chat and topic; buttons go on the last message only."""
+        chat, thread = self.s.telegram.chat_id, self.s.telegram.get("thread_id")
+        return [self.send(chat, t, thread_id=thread, buttons=buttons if i == len(texts) - 1 else None)
+                for i, t in enumerate(texts)]
+
+    def poll(self, db, handler, stop=None) -> None:
+        """Long poll getUpdates forever; the offset lives in kv so a restart never replays a command."""
+        row = db.execute("SELECT value FROM kv WHERE key='tg_offset'").fetchone()
+        offset = int(row["value"]) if row else 0
+        while not (stop and stop.is_set()):
+            try:
+                updates = self.call("getUpdates", offset=offset, timeout=50,
+                                    allowed_updates=["message", "callback_query"])
+            except (Ambiguous, TelegramError, Paused) as ex:
+                log.warning("getUpdates: %s", ex)
+                self._sleep(10)
+                continue
+            for u in updates:
+                offset = u["update_id"] + 1
+                db.execute("INSERT OR REPLACE INTO kv(key, value) VALUES('tg_offset', ?)", (str(offset),))
+                try:
+                    handler(u)
+                except Exception:   # one bad command must never stop the listener
+                    log.exception("update %s failed", u.get("update_id"))
 
 
 def create_posts(db: sqlite3.Connection, run_id: str, chat_id: str, messages: list[dict]) -> int:
