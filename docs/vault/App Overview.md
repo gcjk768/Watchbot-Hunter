@@ -18,7 +18,7 @@ updated: 2026-10-03
 New finds post the moment a job sees them (inside operating hours): 💎 deal cards first, then 🆕 listing cards for every listing never sent before (`alerted` table, `new_finds` in `watchbot/serve.py`). Every listing and deal card ends with a 🛒 **Buy at <shop>** link.
 
 ## Commands (owner only, own topic or DM; unique `/watch*` names)
-`/watchhelp /watchmarket /watchdeals /watchlist /watchadd REF Brand Model /watchdel REF /watchstatus`. Buttons whitelist: market, deals, status.
+`/watchhelp /watchlistings /watchmarket /watchdeals /watchlist /watchadd REF Brand Model /watchdel REF /watchstatus`. Buttons (last message): 🔄 Run again (/watchlistings), 💎 Deals, 📈 Market; whitelist is those plus status. Message layout copies @jameskoh_sgcar_bot (`watchbot/cards.py`).
 
 ## Deal maths (`watchbot/market.py`)
 Market = trimmed median of 30-day SG asks × 0.95; needs ≥5 asks ("thin" otherwise, never a deal). Landed = price + delivery + payment + insurance + authentication + service reserve. Best exit channel from `config.yaml` `costs`. Deal = net ≥ S$500 and margin ≥ 8%; each listing alerts once (`deals` table).

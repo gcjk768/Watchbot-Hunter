@@ -152,28 +152,22 @@ def cmd_deals(s, a) -> int:
 def cmd_sample(s, a) -> int:
     """Post N Singapore listings as watch cards, one per reference first. Runs one discovery call when the
     database holds fewer than N open listings (eBay keys missing, or first run)."""
-    from . import ai, cards, market, refs, serve, vault
+    from . import ai, refs, serve, vault
     x = serve.Ctx(s)
     refs.seed(x.db, s)
-    q = "SELECT * FROM listings WHERE ended_at IS NULL AND price_sgd>0 ORDER BY last_seen DESC, id DESC"
-    if len(x.db.execute(q).fetchall()) < a.n:
+    if len(x.db.execute(serve.OPEN_LISTINGS).fetchall()) < a.n:
         out = ai.discover(s, x.db, x.lim, x.lim.today())
         print(f"discovery: {out['listings']} kept, {out['dropped']} dropped; {out['note']}")
         vault.log_event("🌐", "discovery", f"{out['listings']} Singapore listings kept, {out['dropped']} dropped")
-    rows = [dict(r) for r in x.db.execute(q)]
-    picked = list({r["ref"]: r for r in reversed(rows)}.values())[: a.n]   # newest per reference
-    picked += [r for r in rows if r not in picked][: a.n - len(picked)]
+    texts, picked = serve.listing_cards(x, a.n)
     if not picked:
         print("no Singapore listings found")
         return 1
-    mv = market.values(s, x.db, x.lim.today())
-    items = [(l, refs.get(x.db, l["ref"]), (mv.get(l["ref"]) or {}).get("value")
-              if (mv.get(l["ref"]) or {}).get("label") == "market" else None) for l in picked]
-    x.post(cards.listings(items))
+    x.post(texts)
     for l in picked:
         x.db.execute("INSERT OR IGNORE INTO alerted(listing_id, at) VALUES(?,?)", (l["id"], x.lim.today()))
-    vault.log_event("📨", "listings posted", f"{len(items)} watches")
-    print(f"posted {len(items)} watches")
+    vault.log_event("📨", "listings posted", f"{len(picked)} watches")
+    print(f"posted {len(picked)} watches")
     return 0
 
 
@@ -194,8 +188,8 @@ def cmd_hello(s, a) -> int:
         f"🤖 claude -p · <code>{cards.esc(s.claude.model)}</code> / <code>{cards.esc(s.claude.discover_model)}</code>"
         + (" · 🟢" if shutil.which(s.claude.binary) else " · 🔴 <i>CLI missing</i>"),
         "🧾 Paper mode · <i>learn first, real buys only after 10 closed paper trades</i>", "",
-        "<i>Try /watchhelp, /watchmarket or /watchdeals in this topic.</i>",
-        "", f"<blockquote expandable>{cards.esc(report(s, x.db, x.lim))}</blockquote>"])
+        "<i>Try /watchlistings, /watchdeals or /watchmarket in this topic.</i>",
+        "", cards.note(cards.esc(report(s, x.db, x.lim)))])
     x.post([body])
     print("posted")
     return 0
