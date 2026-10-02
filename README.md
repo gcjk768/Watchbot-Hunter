@@ -2,7 +2,7 @@
 
 A small scheduled bot for learning the Singapore luxury watch market: market values by reference, deals after every cost, paper trading, one lesson a day. Telegram is the daily feed; the Obsidian vault is the record.
 
-Build status: steps 1 and 2 of 6 (scaffold, limits, web, Telegram, Claude wrapper, eBay, FX, retail, watchlist). The full README (Docker, commands, price labels, paper mode, buyer checklist) arrives with step 6.
+Live on the NAS (Docker stack `watchbot`), posting to James Channel topic 4164 as @jameskoh_watchbot. Hourly eBay SG collect with a card for new deals only, daily discovery (06:30), lesson (08:00) and market card (08:30). Commands: `/watchhelp /watchmarket /watchdeals /watchlist /watchadd /watchdel /watchstatus`. Docs: `docs/vault/`. Deploy: `sh deploy.sh`.
 
 ## Sources: robots.txt and terms check (2026-10-02)
 
