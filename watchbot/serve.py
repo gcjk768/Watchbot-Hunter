@@ -1,4 +1,4 @@
-"""The container: APScheduler jobs (hourly collect + new deal cards, daily discovery, lesson and market card) and
+"""The container: APScheduler jobs (hourly collect, discovery every 3 h, daily lesson and market card; new deals and listings post at once) and
 the Telegram command listener. Every job opens its own SQLite connection, logs to the vault, and alerts the admin
 chat on failure instead of crashing."""
 from __future__ import annotations
@@ -26,7 +26,7 @@ HELP = "\n".join([
     "/watchadd <code>REF Brand Model</code> · watch a reference",
     "/watchdel <code>REF</code> · stop watching it",
     "/watchstatus · budgets, cooldowns, data held",
-    "<i>Hourly eBay collect, daily discovery 06:30, lesson 08:00, market card 08:30. New deals post the moment they appear.</i>"])
+    "<i>Hourly eBay collect, discovery every 3 h, lesson 08:00, market card 08:30. New deals and new listings post the moment they appear, 24/7.</i>"])
 
 
 class Ctx:
@@ -77,6 +77,33 @@ def deal_cards(x, only_new: bool, run_id: str = "manual") -> list[str]:
     return cards.deals(ds) if ds else []
 
 
+def new_finds(x) -> list[str]:
+    """🆕 cards for open Singapore listings never sent before (deals already have their own card)."""
+    rows = [dict(r) for r in x.db.execute(
+        "SELECT * FROM listings WHERE ended_at IS NULL AND price_sgd>0 AND id NOT IN (SELECT listing_id FROM alerted) "
+        "AND id NOT IN (SELECT listing_id FROM deals) ORDER BY id")]
+    if not rows:
+        return []
+    mv = market.values(x.s, x.db, x.lim.today())
+    items = []
+    for l in rows:
+        x.db.execute("INSERT OR IGNORE INTO alerted(listing_id, at) VALUES(?,?)", (l["id"], x.lim.today()))
+        ref = refsmod.get(x.db, l["ref"])
+        m = mv.get(l["ref"]) or {}
+        items.append((l, ref, m.get("value") if m.get("label") == "market" else None))
+        vault.log_event("🆕", "new listing", f"{l['ref']} {cards.money(l['price_sgd'])} {l.get('url') or ''}",
+                        vault.watch_note(ref))
+    return cards.listings(items, new=True)
+
+
+def alert_new(x, run_id: str) -> None:
+    """Post new deals, then new listings, the moment a job finds them. Silent when nothing is new."""
+    texts = deal_cards(x, only_new=True, run_id=run_id) + new_finds(x)
+    if texts:
+        x.post(texts)
+        vault.log_event("📨", "new finds sent", f"{len(texts)} message(s)")
+
+
 def market_cards(x) -> list[str]:
     mv = market.values(x.s, x.db, x.lim.today())
     return cards.market(refsmod.watched(x.db), mv, x.lim.today())
@@ -88,10 +115,7 @@ def collect_job(x) -> None:
     out = run(x.s, x.db, x.lim, fetcher=x.fetcher)
     new = sum(c["new"] for c in out["per_ref"].values())
     vault.log_event("🔎", "collect", f"{new} new listings; " + ("; ".join(out["notes"]) or "no notes"))
-    texts = deal_cards(x, only_new=True, run_id=out["run_id"])
-    if texts:
-        x.post(texts)
-        vault.log_event("📨", "deal alert sent", f"{len(texts)} message(s)")
+    alert_new(x, out["run_id"])
 
 
 @job("discover")
@@ -102,9 +126,7 @@ def discover_job(x) -> None:
                     f"{len(out['news'])} new news; {out['note']}"[:400])
     if out["news"]:
         x.post(cards.news(out["news"]), buttons=None)
-    texts = deal_cards(x, only_new=True, run_id=f"discover-{x.lim.today()}")
-    if texts:
-        x.post(texts)
+    alert_new(x, f"discover-{x.lim.today()}")
 
 
 @job("lesson")

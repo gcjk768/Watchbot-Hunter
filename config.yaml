@@ -40,7 +40,7 @@ telegram:
 schedule:
   timezone: Asia/Singapore
   collect_cron: "7 * * * *"      # hourly 24/7 like the rest of the fleet; cards only for new deals
-  discover_cron: "30 6 * * *"    # one claude -p web search for Singapore listings and news
+  discover_cron: "30 */3 * * *"  # claude -p web search every 3 h, 24/7; new finds post at once
   lesson_cron: "0 8 * * *"
   market_cron: "30 8 * * *"      # daily market card for the watchlist
 
@@ -85,7 +85,7 @@ limits:
   daily_calls_watchcharts: 100
   daily_calls_fx: 4
   telegram: {min_gap_seconds: 3.5, max_per_minute: 17, max_retry_after_seconds: 900}
-  claude: {max_calls_per_day: 6}
+  claude: {max_calls_per_day: 12}   # 8 discoveries + 1 lesson + headroom; 12 is the hard ceiling
 
 claude:
   binary: claude

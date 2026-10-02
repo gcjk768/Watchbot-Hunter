@@ -83,11 +83,12 @@ def test_account_limit_is_not_retried(s, lim):
 
 def test_daily_cap(s, lim):
     run, calls = runner_seq(ok_out({}))
-    for _ in range(6):
+    cap = s.limits.claude.max_calls_per_day
+    for _ in range(cap):
         claude.call(s, lim, "sys.md", {}, SCHEMA, runner=run)
     with pytest.raises(claude.ClaudeFailure) as e:
         claude.call(s, lim, "sys.md", {}, SCHEMA, runner=run)
-    assert e.value.kind == "budget" and len(calls) == 6
+    assert e.value.kind == "budget" and len(calls) == cap
 
 
 def test_text_validation():
