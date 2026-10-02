@@ -5,6 +5,7 @@ updated: 2026-10-03
 # Changelog
 
 ## 2026-10-03
+- operating hours 05:00 to 21:00 SGT, avoiding the trading desk US session; discovery 5x/day, claude cap 8
 - feat: 🆕 new-listing alerts the moment they are found, once each (`alerted` table); discovery every 3 h 24/7; claude cap 12/day
 - feat: 🛒 Buy at <shop> purchase link on every listing and deal card; site line shows the shop domain
 - feat: `watchbot sample N` posts N listing cards (`watchbot/cli.py`, `watchbot/cards.py` listing_block)
