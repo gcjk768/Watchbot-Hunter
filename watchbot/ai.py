@@ -4,9 +4,18 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 
 from . import claude, collect, refs as refsmod, region, textcheck, vault
-from .sources.base import Listing
+from .sources.base import Listing, mentions_ref
+
+FOREIGN_LOCALE = re.compile(r"/(?:[a-z]{2}-(?!sg/)[a-z]{2})(?:/|$)", re.I)   # /en-my/, /en-vn/: another country's price
+
+
+def buyable(url: str, ref: dict) -> bool:
+    """A discovered link is kept only when it is a product page for this exact reference in Singapore: the URL names
+    the reference (category pages and look-alike references do not) and is not another country's locale."""
+    return bool(url) and mentions_ref(url, ref["ref"], ref.get("aliases") or ()) and not FOREIGN_LOCALE.search(url)
 
 log = logging.getLogger(__name__)
 TOPICS = ["reading a reference number", "box and papers and why sets sell faster", "service intervals and costs",
@@ -32,10 +41,10 @@ def discover(s, db, lim, today: str) -> dict:
              "never_fetch_domains": list(s.never_fetch_domains),
              "already_done": vault.recent(1500)}
     out = claude.call(s, lim, system, stdin, schema, web=True, model=s.claude.discover_model)
-    known = {r["ref"] for r in watched}
+    known = {r["ref"]: r for r in watched}
     found = []
     for x in out.get("listings") or []:
-        if x.get("ref") not in known or not x.get("price"):
+        if x.get("ref") not in known or not x.get("price") or not buyable(x.get("url") or "", known[x["ref"]]):
             continue
         sid = hashlib.sha1(f"{x['ref']}|{x.get('url') or x.get('title')}".encode()).hexdigest()[:16]
         found.append(Listing(source="discover", source_id=sid, ref=x["ref"], title=x.get("title") or "",

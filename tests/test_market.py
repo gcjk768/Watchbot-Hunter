@@ -104,3 +104,14 @@ def test_new_finds_alert_once_and_skip_deals(s, db, lim):
     out = new_finds(X(s, db, lim))
     assert len(out) == 1 and "🆕" in out[0] and "126610LN" in out[0] and "126300" not in out[0]
     assert new_finds(X(s, db, lim)) == []
+
+
+def test_discovered_links_must_be_product_pages_for_the_ref():
+    from watchbot.ai import buyable
+    sub = {"ref": "126610LN", "aliases": []}
+    assert buyable("https://watchexchange.sg/watches/rolex/submariner/126610ln/", sub)
+    assert not buyable("https://watchexchange.sg/watches/omega/speedmaster/", {"ref": "310.30.42.50.01.001"})
+    assert not buyable("https://www.thehourglass.com/en-VN/product/longines/l3-812-4-53-6", {"ref": "L3.802.4.63.6"})
+    assert not buyable("https://www.thehourglass.com/en-MY/product/iwc/iw371605", {"ref": "IW371605"})
+    assert buyable("https://www.thehourglass.com/en-sg/product/iwc/iw371605", {"ref": "IW371605"})
+    assert buyable("https://kimwatch.sg/products/santos-de-cartier-medium-wssa0029-unworn", {"ref": "WSSA0029"})
