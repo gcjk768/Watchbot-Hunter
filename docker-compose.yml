@@ -1,0 +1,31 @@
+services:
+  watchbot:
+    build:
+      context: .
+      args:
+        UID: 1000
+    # Dockge Update rebuilds from the code on disk
+    pull_policy: build
+    image: watchbot:local
+    container_name: watchbot
+    restart: unless-stopped
+    init: true
+    env_file: .env
+    environment:
+      TZ: Asia/Singapore
+      VAULT_DIR: /vault
+    volumes:
+      - ./data:/app/data
+      # edit on the NAS, then `docker compose restart`
+      - ./config.yaml:/app/config.yaml:ro
+      - ./rules.yaml:/app/rules.yaml:ro
+      # Obsidian vault: movement log + memory
+      - "/volume1/<USER>/Obsidian/Watchbot:/vault"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    # One shot commands on the NAS:
+    #   docker compose exec watchbot watchbot status
+    #   docker compose exec watchbot watchbot hello

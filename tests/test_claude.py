@@ -52,7 +52,8 @@ def test_flags_for_writing_disallow_every_tool(s):
     for flag in ("--output-format", "--json-schema", "--permission-mode", "--permission-prompts", "--strict-mcp-config",
                  "--no-session-persistence", "--fallback-model"):
         assert flag in cmd
-    assert cmd[cmd.index("--model") + 1] == "sonnet" and cmd[cmd.index("--fallback-model") + 1] == "haiku"
+    assert cmd[cmd.index("--model") + 1] == s.claude.model and cmd[cmd.index("--fallback-model") + 1] == s.claude.fallback_model
+
     assert cmd[cmd.index("--permission-mode") + 1] == "dontAsk" and cmd[cmd.index("--permission-prompts") + 1] == "none"
     assert cmd[cmd.index("--tools") + 1] == "" and "WebSearch" in cmd[cmd.index("--disallowedTools") + 1]
     assert "--bare" not in cmd and "--allowedTools" not in cmd
@@ -68,7 +69,7 @@ def test_model_limit_retries_once_on_fallback(s, lim):
     limit = json.dumps({"subtype": "success", "is_error": True, "result": "You've hit your Sonnet limit"})
     run, calls = runner_seq(limit, ok_out({"x": 1}))
     assert claude.call(s, lim, "sys.md", {"a": 1}, SCHEMA, runner=run) == {"x": 1}
-    assert calls[1][calls[1].index("--model") + 1] == "haiku" and len(calls) == 2
+    assert calls[1][calls[1].index("--model") + 1] == s.claude.fallback_model and len(calls) == 2
 
 
 def test_account_limit_is_not_retried(s, lim):
@@ -100,3 +101,7 @@ def test_text_validation():
 
 def test_undash():
     assert undash("Rolex — a classic - nice") == "Rolex, a classic, nice"
+
+def test_no_fallback_flag_when_it_equals_the_model(s):
+    cmd = claude.build_cmd(s, "sys.md", SCHEMA, web=True, max_turns=3, model=s.claude.fallback_model)
+    assert "--fallback-model" not in cmd
