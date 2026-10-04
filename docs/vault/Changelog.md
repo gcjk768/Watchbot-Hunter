@@ -1,8 +1,13 @@
 ---
 tags: [active]
-updated: 2026-10-03
+updated: 2026-10-04
 ---
 # Changelog
+
+## 2026-10-04
+- feat: third focus card "Rolex popular and appreciating" (14 refs listed in `config.yaml` `focus[].refs`: Daytona x3, GMT Pepsi/Sprite/Root Beer, Explorer x3, Lady-Datejust 28 x2, Datejust 36 16030, OP 36/41); watchlist + 279174, 279171, 16030; `market.focus` accepts `refs`
+- feat: watchlist + 3 Omega Speedmaster 38 refs (324.30.38.50.01/03/06.001: black, blue, grey, confirmed on omegawatches.com); retail left unknown until read from a brand page
+- feat: 🎯 focus category: `/watchfocus` (+ 🎯 Focus button, posted after the 08:30 market card) sends one message each for Omega Speedmaster and Rolex Submariner: cheapest open SG listing + per-reference market value, % vs retail and APPRECIATING/DEPRECIATING trend (`market.focus`/`market.trend`, `cards.focus_card`, `config.yaml` `focus`)
 
 ## 2026-10-03
 - feat: watchlist 38 → 66: 15 more appreciation candidates + 13 popular-in-SG refs (Datejust fluted, OP36, Yacht-Master, Calatrava, BB58 GMT, Panerai, Hublot, Big Pilot); brands + Panerai, Hublot

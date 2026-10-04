@@ -16,12 +16,13 @@ from .alerts import Alerts
 from .telegram import Telegram
 
 log = logging.getLogger(__name__)
-BUTTONS = [("🔄 Run again", "watchlistings"), ("💎 Deals", "watchdeals"), ("📈 Market", "watchmarket")]
-CALLBACKS = {"watchlistings", "watchmarket", "watchdeals", "watchstatus"}   # cheap commands only, never a Claude call
+BUTTONS = [("🔄 Run again", "watchlistings"), ("💎 Deals", "watchdeals"), ("📈 Market", "watchmarket"), ("🎯 Focus", "watchfocus")]
+CALLBACKS = {"watchlistings", "watchmarket", "watchfocus", "watchdeals", "watchstatus"}   # cheap commands only, never a Claude call
 HELP = "\n".join([
     cards.header("hello", "Singapore watch market"), "",
     "/watchlistings · the latest Singapore listings with buy links",
     "/watchmarket · market value per watched reference",
+    "/watchfocus · Omega Speedmaster and Rolex Submariner: cheapest now, appreciation or depreciation",
     "/watchdeals · open deals that clear your margin",
     "/watchlist · the watchlist with retail prices",
     "/watchadd <code>REF Brand Model</code> · watch a reference",
@@ -126,6 +127,12 @@ def market_cards(x) -> list[str]:
     return cards.market(refsmod.watched(x.db), mv, x.lim.today())
 
 
+def focus_cards(x) -> list[str]:
+    """One message per focus model, so each has its own box."""
+    mv = market.values(x.s, x.db, x.lim.today())
+    return [cards.focus_card(f) for f in market.focus(x.s, x.db, mv, x.lim.today())]
+
+
 @job("collect")
 def collect_job(x) -> None:
     from .collect import run
@@ -156,7 +163,7 @@ def lesson_job(x) -> None:
 
 @job("market")
 def market_job(x) -> None:
-    x.post(market_cards(x))
+    x.post(market_cards(x) + focus_cards(x))
     vault.log_event("📈", "market card posted")
     vault.write_home()
 
@@ -212,6 +219,9 @@ class Bot:
 
     def cmd_watchmarket(self, arg):
         return market_cards(self.x)
+
+    def cmd_watchfocus(self, arg):
+        return focus_cards(self.x)
 
     def cmd_watchdeals(self, arg):
         return deal_cards(self.x, only_new=False) or [cards.header("deals", cards.today()) + "\n\n⚪ <i>No open "

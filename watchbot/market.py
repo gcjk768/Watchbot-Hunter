@@ -101,3 +101,43 @@ def new_deals(db, deals: list[dict], run_id: str, today: str) -> list[dict]:
                                              json.dumps(d["flags"]), "asking", today))
         fresh.append(d)
     return fresh
+
+
+def trend(db, ref: str, today: str, days: int = 30) -> dict | None:
+    """Latest solid market value against the one `days` ago (else the oldest we hold). None until two dated values exist."""
+    rows = db.execute("SELECT date, value_sgd FROM market_daily WHERE ref=? AND label='market' AND date<=? "
+                      "ORDER BY date", (ref, today)).fetchall()
+    if len(rows) < 2:
+        return None
+    cutoff = (date.fromisoformat(today) - timedelta(days=days)).isoformat()
+    old = next((r for r in reversed(rows) if r[0] <= cutoff), rows[0])
+    new = rows[-1]
+    if old[0] == new[0] or not old[1]:
+        return None
+    return {"since": old[0], "old": old[1], "new": new[1], "pct": round((new[1] / old[1] - 1) * 100, 1)}
+
+
+def focus(s, db, mv: dict[str, dict], today: str) -> list[dict]:
+    """Per focus model: its watched refs with market, retail premium and trend, plus the cheapest open listing."""
+    out = []
+    for f in s.get("focus") or []:
+        if f.get("refs"):
+            by = {r["ref"]: r for r in refsmod.watched(db)}
+            rs = [by[x] for x in f.refs if x in by]
+        else:
+            rs = [r for r in refsmod.watched(db) if r["brand"] == f.brand and f.match.lower() in (r["model"] or "").lower()]
+        rows = []
+        for r in rs:
+            m = mv.get(r["ref"])
+            value = m["value"] if m and m["label"] == "market" else None
+            rows.append({"ref": r, "market": value, "n": m["n"] if m else 0, "trend": trend(db, r["ref"], today),
+                         "premium_pct": round((value / r["retail_sgd"] - 1) * 100, 1) if value and r.get("retail_sgd") else None})
+        cheapest = None
+        if rs:
+            q = ",".join("?" * len(rs))
+            l = db.execute(f"SELECT * FROM listings WHERE ref IN ({q}) AND ended_at IS NULL AND price_sgd>0 "
+                           "AND last_seen>=date('now', '-3 day') ORDER BY price_sgd LIMIT 1", [r["ref"] for r in rs]).fetchone()
+            if l:
+                cheapest = dict(l)
+        out.append({"title": f.title, "refs": rows, "cheapest": cheapest})
+    return out

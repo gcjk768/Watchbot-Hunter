@@ -1,6 +1,6 @@
 ---
 tags: [active]
-updated: 2026-10-03
+updated: 2026-10-04
 ---
 # App Overview
 
@@ -18,11 +18,14 @@ updated: 2026-10-03
 New finds post the moment a job sees them (inside operating hours): 💎 deal cards first, then 🆕 listing cards for every listing never sent before (`alerted` table, `new_finds` in `watchbot/serve.py`). Every listing and deal card ends with a 🛒 **Buy at <shop>** link.
 
 ## Commands (owner only, own topic or DM; unique `/watch*` names)
-`/watchhelp /watchlistings /watchmarket /watchdeals /watchlist /watchadd REF Brand Model /watchdel REF /watchstatus`. Buttons (last message): 🔄 Run again (/watchlistings), 💎 Deals, 📈 Market; whitelist is those plus status. Message layout copies @owner_sgcar_bot (`watchbot/cards.py`).
+`/watchhelp /watchlistings /watchmarket /watchfocus /watchdeals /watchlist /watchadd REF Brand Model /watchdel REF /watchstatus`. Buttons (last message): 🔄 Run again (/watchlistings), 💎 Deals, 📈 Market; whitelist is those plus status. Message layout copies @owner_sgcar_bot (`watchbot/cards.py`).
 
 ## Deal maths (`watchbot/market.py`)
 No price cap. Watchlist (`config.yaml` `starter_watchlist`) = 66 refs: 15 learning, 38 appreciation candidates (trade at/above retail), 13 popular in SG (hold value).
 Market = trimmed median of 30-day SG asks × 0.95; needs ≥5 asks ("thin" otherwise, never a deal). Landed = price + delivery + payment + insurance + authentication + service reserve. Best exit channel from `config.yaml` `costs`. Deal = net ≥ S$500 and margin ≥ 8%; each listing alerts once (`deals` table).
+
+## Focus models (`config.yaml` `focus`)
+Omega Speedmaster and Rolex Submariner each get their own message (`/watchfocus`, also after the 08:30 market card): cheapest open SG listing, then per reference market value, premium vs retail and the 30-day trend (🟢 APPRECIATING / 🔴 DEPRECIATING, holder's view; needs two days of solid asks). A third card, Rolex popular and appreciating, lists 14 refs in one message (`refs:` instead of `match:`). Add a model by adding a `focus` line.
 
 ## Test
 `docker compose exec watchbot watchbot sample 5` posts 5 Singapore listings as watch cards (runs one discovery call first when fewer than 5 are stored).

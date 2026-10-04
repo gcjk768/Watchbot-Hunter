@@ -13,6 +13,7 @@ SECTION_TITLES = {
     "deals": "💎 Watch deals",
     "listings": "⌚ Watch listings",
     "market": "📈 Watch market",
+    "focus": "🎯 Watch focus",
     "lesson": "🎓 Watch lesson",
     "status": "🩺 Watchbot status",
     "watchlist": "📋 Watchlist",
@@ -178,6 +179,37 @@ def market(refs: list[dict], mv: dict[str, dict], day: str) -> list[str]:
     return split(header("market", day), blocks, note(
         "Market = trimmed median of Singapore asking prices from the last 30 days, times 0.95 because asks sit above "
         "sales. Thin = fewer than five asks, shown but never used for deals. 🟢 cheaper, 🔴 dearer over 7 days."))
+
+
+def _trend_line(r: dict) -> str:
+    """Appreciation green, depreciation red: this is about the value of a watch you hold, not the price to pay."""
+    t, p = r["trend"], r["premium_pct"]
+    if t:
+        word = "APPRECIATING" if t["pct"] > 0 else ("DEPRECIATING" if t["pct"] < 0 else "FLAT")
+        head = f"{'🟢' if t['pct'] > 0 else '🔴' if t['pct'] < 0 else '⚪'} <b>{word}</b> {esc(delta(t['new'] - t['old'], t['pct']))} <i>since {esc(t['since'])}</i>"
+    else:
+        head = "⚪ <i>trend needs two days of solid asks</i>"
+    vs = f" · {'🟢' if p > 0 else '🔴' if p < 0 else '⚪'} <i>{esc(delta(p))}% vs retail</i>" if p is not None else ""
+    return head + vs
+
+
+def focus_card(f: dict) -> str:
+    """One message per focus model: the cheapest open listing, then each reference's market value and trend."""
+    l = f["cheapest"]
+    if l:
+        ref = next(r["ref"] for r in f["refs"] if r["ref"]["ref"] == l["ref"])
+        m = next(r["market"] for r in f["refs"] if r["ref"]["ref"] == l["ref"])
+        body = ["💸 <b>Cheapest now</b>", listing_block(1, l, ref, m)]
+    else:
+        body = ["💸 <b>Cheapest now</b>\n⚪ <i>no open Singapore listing yet</i>"]
+    blocks = [card(i, plain_name(r["ref"]), None,
+                   ["💰 " + dot(f"Market {money(r['market'])}" if r["market"] else "Market thin", f"{r['n']} asks",
+                                f"Retail {money(r['ref'].get('retail_sgd'))}"), _trend_line(r)], desc=r["ref"]["ref"])
+              for i, r in enumerate(f["refs"], 1)]
+    return "\n\n".join([header("focus", f["title"])] + body + ["📊 <b>Value by reference</b>"] + blocks +
+                         [note("Asking prices, not sales. Market = trimmed median of 30-day Singapore asks times 0.95, "
+                               "needs five asks. Trend compares the latest market value with 30 days ago, or the oldest "
+                               "we hold. 🟢 appreciating or above retail, 🔴 depreciating or below: the view of a holder.")])
 
 
 def lesson(title: str, body: str, action: str, topic: str) -> str:

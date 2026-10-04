@@ -119,3 +119,24 @@ def test_discovered_links_must_be_product_pages_for_the_ref():
     assert not buyable("https://www.thehourglass.com/en-MY/product/iwc/iw371605", {"ref": "IW371605"})
     assert buyable("https://www.thehourglass.com/en-sg/product/iwc/iw371605", {"ref": "IW371605"})
     assert buyable("https://kimwatch.sg/products/santos-de-cartier-medium-wssa0029-unworn", {"ref": "WSSA0029"})
+
+
+def test_focus_cards_cheapest_and_trend(s, db):
+    refs.seed(db, s)
+    for i, p in enumerate([16000, 16500, 17000, 17500, 18000]):
+        add_listing(db, "126610LN", p, f"a{i}")
+    add_listing(db, "124060", 12000, "cheap")
+    db.execute("INSERT INTO market_daily(ref,date,condition,set_type,value_sgd,label,n_comparables) "
+               "VALUES('126610LN','2026-08-01','any','any',15000,'market',6)")
+    today = date.today().isoformat()
+    mv = market.values(s, db, today)
+    out = market.focus(s, db, mv, today)
+    assert [f["title"] for f in out] == ["Omega Speedmaster", "Rolex Submariner", "Rolex popular and appreciating"]
+    pop = out[2]
+    assert len(pop["refs"]) == 14 and len(cards.focus_card(pop)) <= 4096
+    sub = out[1]
+    assert sub["cheapest"]["ref"] == "124060" and out[0]["cheapest"] is None
+    t = next(r for r in sub["refs"] if r["ref"]["ref"] == "126610LN")["trend"]
+    assert t["since"] == "2026-08-01" and t["pct"] > 0
+    texts = [cards.focus_card(f) for f in out[:2]]
+    assert "APPRECIATING" in texts[1] and "Cheapest now" in texts[0] and all(len(t) <= 4096 for t in texts)

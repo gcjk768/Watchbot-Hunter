@@ -53,11 +53,17 @@ starter_watchlist:
   - {brand: Vacheron Constantin, model: Overseas Blue, ref: "4500V/110A-B128"}
   - {brand: A. Lange & Sohne, model: Odysseus, ref: "363.179"}
   - {brand: Omega, model: Speedmaster Silver Snoopy, ref: "310.32.42.50.02.001"}
+  - {brand: Omega, model: Speedmaster 38 Co-Axial Chronograph (black), ref: "324.30.38.50.01.001"}
+  - {brand: Omega, model: Speedmaster 38 Co-Axial Chronograph (blue), ref: "324.30.38.50.03.001"}
+  - {brand: Omega, model: Speedmaster 38 Co-Axial Chronograph (grey), ref: "324.30.38.50.06.001"}
   - {brand: Tudor, model: Black Bay 58 Bronze, ref: "M79012M"}
   - {brand: Rolex, model: Land Dweller 40, ref: "127334"}
   - {brand: Rolex, model: Day Date 40 Olive, ref: "228238"}
   - {brand: Rolex, model: Daytona Panda Gold, ref: "126508"}
   - {brand: Rolex, model: Explorer 36, ref: "124270"}
+  - {brand: Rolex, model: Lady-Datejust 28 (steel and white gold), ref: "279174"}
+  - {brand: Rolex, model: Lady-Datejust 28 (steel and Everose), ref: "279171"}
+  - {brand: Rolex, model: Datejust 36 (vintage), ref: "16030"}
   - {brand: Rolex, model: GMT Master II Root Beer, ref: "126711CHNR"}
   - {brand: Patek Philippe, model: Nautilus Annual Calendar, ref: "5726/1A"}
   - {brand: Patek Philippe, model: Nautilus Moonphase, ref: "5712/1A"}
@@ -83,6 +89,15 @@ starter_watchlist:
   - {brand: Panerai, model: Luminor Marina, ref: "PAM01312"}
   - {brand: Hublot, model: Big Bang Unico 42, ref: "441.NX.1171.RX"}
   - {brand: IWC, model: Big Pilot, ref: "IW501001"}
+
+# focus models: one card (own message) each with the cheapest open Singapore listing and the value trend per reference.
+# A reference belongs to a model when brand matches and the watchlist model name contains `match`, or is listed in `refs`.
+focus:
+  - {title: Omega Speedmaster, brand: Omega, match: Speedmaster}
+  - {title: Rolex Submariner, brand: Rolex, match: Submariner}
+  - title: Rolex popular and appreciating
+    refs: ["126500LN", "116500LN", "126508", "126710BLRO", "126720VTNR", "126711CHNR", "224270", "124270", "226570",
+           "279174", "279171", "16030", "126000", "124300"]
 
 telegram:
   chat_id: "@your_channel"       # TELEGRAM_CHAT_ID in .env overrides
