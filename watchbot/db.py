@@ -58,6 +58,9 @@ CREATE TABLE IF NOT EXISTS posts(
   id INTEGER PRIMARY KEY, run_id TEXT, kind TEXT, ref_id TEXT, chat_id TEXT, body TEXT, message_id INTEGER,
   post_status TEXT CHECK(post_status IN ('pending','sending','posted','failed')), posted_at REAL, deleted_at REAL,
   delete_status TEXT, UNIQUE(run_id, kind, ref_id));
+-- listings already sent as a new finding card, so each one alerts once
+CREATE TABLE IF NOT EXISTS alerted(
+  listing_id INTEGER PRIMARY KEY, at TEXT);
 CREATE TABLE IF NOT EXISTS favorites(
   id INTEGER PRIMARY KEY, message_id INTEGER, deal_id INTEGER, saved_at TEXT);
 CREATE TABLE IF NOT EXISTS rules(

@@ -1,4 +1,4 @@
-"""watchbot collect | backfill <days> | deals | lesson | serve | status | purge | test-telegram | vault rebuild"""
+"""watchbot serve | collect | backfill <days> | market | deals | discover | lesson | hello | status | health | purge | test-telegram | watchlist"""
 from __future__ import annotations
 
 import argparse
@@ -92,7 +92,7 @@ def cmd_test_telegram(s, a) -> int:
     db, lim, _ = context(s)
     tg = tgm.Telegram(s.bot_token, s, lim)
     print("bot:", tg.call("getMe")["username"])
-    mid = tg.send(s.telegram.chat_id, "watchbot test message, deleting it now")
+    mid = tg.send(s.telegram.chat_id, "watchbot test message, deleting it now", thread_id=s.telegram.get("thread_id"))
     tg.call("deleteMessage", chat_id=s.telegram.chat_id, message_id=mid)
     print("channel: posted and deleted")
     if s.telegram.admin_chat_id:
@@ -111,14 +111,101 @@ def cmd_watchlist(s, a) -> int:
     return 0
 
 
+def cmd_serve(s, a) -> int:
+    from . import serve
+    serve.main(s)
+    return 0
+
+
+def cmd_health(s, a) -> int:
+    """Docker healthcheck: the scheduler writes data/heartbeat every minute."""
+    import time
+    hb = s.data_dir / "heartbeat"
+    age = time.time() - float(hb.read_text()) if hb.exists() else 1e9
+    print(f"heartbeat {age:.0f} s ago")
+    return 0 if age < 600 else 1
+
+
+def _job(name: str, s) -> int:
+    """Run one scheduler job now, posting exactly as the schedule would."""
+    from . import serve
+    getattr(serve, f"{name}_job")(s)
+    return 0
+
+
+def cmd_market(s, a) -> int:
+    from . import serve
+    x = serve.Ctx(s)
+    texts = serve.market_cards(x)
+    x.post(texts) if a.post else print("\n\n".join(texts))
+    return 0
+
+
+def cmd_deals(s, a) -> int:
+    from . import serve
+    x = serve.Ctx(s)
+    texts = serve.deal_cards(x, only_new=False)
+    print("\n\n".join(texts) or "no deals clear the floors")
+    return 0
+
+
+def cmd_sample(s, a) -> int:
+    """Post N Singapore listings as watch cards, one per reference first. Runs one discovery call when the
+    database holds fewer than N open listings (eBay keys missing, or first run)."""
+    from . import ai, refs, serve, vault
+    x = serve.Ctx(s)
+    refs.seed(x.db, s)
+    if len(x.db.execute(serve.OPEN_LISTINGS).fetchall()) < a.n:
+        out = ai.discover(s, x.db, x.lim, x.lim.today())
+        print(f"discovery: {out['listings']} kept, {out['dropped']} dropped; {out['note']}")
+        vault.log_event("🌐", "discovery", f"{out['listings']} Singapore listings kept, {out['dropped']} dropped")
+    texts, picked = serve.listing_cards(x, a.n)
+    if not picked:
+        print("no Singapore listings found")
+        return 1
+    x.post(texts)
+    for l in picked:
+        x.db.execute("INSERT OR IGNORE INTO alerted(listing_id, at) VALUES(?,?)", (l["id"], x.lim.today()))
+    vault.log_event("📨", "listings posted", f"{len(picked)} watches")
+    print(f"posted {len(picked)} watches")
+    return 0
+
+
+def cmd_hello(s, a) -> int:
+    """One test card into the bot's topic, with the follow up buttons."""
+    import shutil
+
+    from . import cards, refs, serve
+    from .status import report
+    x = serve.Ctx(s)
+    refs.seed(x.db, s)
+    n = len(refs.watched(x.db))
+    body = "\n".join([
+        cards.header("hello", "deployed and listening"), "",
+        f"⌚ <b>Watchlist</b> · {n} references, Singapore only",
+        f"🔎 eBay SG collect · <i>hourly</i>" + ("" if s.secrets.ebay_client_id else " · 🔴 <i>no EBAY_CLIENT_ID yet</i>"),
+        "⏰ 05:00 to 21:00 SGT, quiet in the trading desk session", "🌐 Discovery every 3 h · 🎓 lesson 08:00 · 📈 market 08:30 · 🆕 new finds at once",
+        f"🤖 claude -p · <code>{cards.esc(s.claude.model)}</code> / <code>{cards.esc(s.claude.discover_model)}</code>"
+        + (" · 🟢" if shutil.which(s.claude.binary) else " · 🔴 <i>CLI missing</i>"),
+        "🧾 Paper mode · <i>learn first, real buys only after 10 closed paper trades</i>", "",
+        "<i>Try /watchlistings, /watchdeals or /watchmarket in this topic.</i>",
+        "", cards.note(cards.esc(report(s, x.db, x.lim)))])
+    x.post([body])
+    print("posted")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="watchbot")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("collect", help="one collect now: FX, retail, every source, Singapore only")
     b = sub.add_parser("backfill", help="collect the watchlist slowly to build history")
     b.add_argument("days", type=int)
-    for name in ("status", "purge", "test-telegram", "watchlist"):
+    for name in ("status", "purge", "test-telegram", "watchlist", "serve", "health", "deals", "discover", "lesson",
+                 "hello"):
         sub.add_parser(name)
+    sub.add_parser("market").add_argument("--post", action="store_true", help="post the card instead of printing")
+    sub.add_parser("sample", help="post N Singapore listings as watch cards").add_argument("n", type=int, nargs="?", default=5)
     a = ap.parse_args(argv)
     try:
         s = config.load()
@@ -127,7 +214,9 @@ def main(argv=None) -> int:
         return 2
     setup_logging(s)
     cmds = {"collect": cmd_collect, "backfill": cmd_backfill, "status": cmd_status, "purge": cmd_purge,
-            "test-telegram": cmd_test_telegram, "watchlist": cmd_watchlist}
+            "test-telegram": cmd_test_telegram, "watchlist": cmd_watchlist, "serve": cmd_serve, "health": cmd_health,
+            "market": cmd_market, "deals": cmd_deals, "hello": cmd_hello, "sample": cmd_sample,
+            "discover": lambda s, a: _job("discover", s), "lesson": lambda s, a: _job("lesson", s)}
     try:
         return cmds[a.cmd](s, a)
     except config.ConfigError as ex:

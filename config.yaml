@@ -2,14 +2,13 @@
 me:
   country: SG
   currency: SGD
-  budget_max_sgd: 15000
   min_net_margin_pct: 8          # after all costs
   min_net_profit_sgd: 500
   hold_days_target: 60
   sell_channel: [local_private, consignment, dealer_buyback, online_platform]
   experience: beginner
   watchlist_refs: []             # empty means the starter list below
-  brands: [Rolex, Omega, Tudor, Cartier, Grand Seiko, TAG Heuer, Longines, IWC, Patek Philippe, Audemars Piguet]
+  brands: [Rolex, Omega, Tudor, Cartier, Grand Seiko, TAG Heuer, Longines, IWC, Patek Philippe, Audemars Piguet, Vacheron Constantin, A. Lange & Sohne, Panerai, Hublot]
   paper_mode: true
   paper_min_trades: 10
   paper_override: false          # only you set this; lets paper_mode go false before paper_min_trades have closed
@@ -30,24 +29,92 @@ starter_watchlist:
   - {brand: IWC, model: Portugieser Chronograph, ref: "IW371605"}
   - {brand: Longines, model: Spirit Zulu Time 39, ref: "L3.802.4.63.6"}
   - {brand: TAG Heuer, model: Carrera Chronograph 39, ref: "CBS2210.FC6534"}
+  # appreciation candidates: references that trade at or above retail on the secondary market
+  # (waitlisted, discontinued, or steel sports icons). Market values for rare ones stay "thin" until 5 SG asks.
+  - {brand: Rolex, model: Submariner No Date, ref: "124060"}
+  - {brand: Rolex, model: Submariner Date Starbucks, ref: "126610LV"}
+  - {brand: Rolex, model: Submariner Date Hulk, ref: "116610LV"}
+  - {brand: Rolex, model: GMT Master II Pepsi, ref: "126710BLRO"}
+  - {brand: Rolex, model: GMT Master II Sprite, ref: "126720VTNR"}
+  - {brand: Rolex, model: Cosmograph Daytona, ref: "126500LN"}
+  - {brand: Rolex, model: Cosmograph Daytona (previous), ref: "116500LN"}
+  - {brand: Rolex, model: Explorer II, ref: "226570"}
+  - {brand: Rolex, model: Explorer 40, ref: "224270"}
+  - {brand: Rolex, model: Sea Dweller, ref: "126600"}
+  - {brand: Patek Philippe, model: Nautilus (discontinued), ref: "5711/1A"}
+  - {brand: Patek Philippe, model: Nautilus Chronograph, ref: "5980/1A"}
+  - {brand: Patek Philippe, model: Aquanaut, ref: "5167A"}
+  - {brand: Patek Philippe, model: Nautilus, ref: "5811/1G"}
+  - {brand: Audemars Piguet, model: Royal Oak 41, ref: "15510ST"}
+  - {brand: Audemars Piguet, model: Royal Oak 41 (previous), ref: "15500ST"}
+  - {brand: Audemars Piguet, model: Royal Oak Jumbo (discontinued), ref: "15202ST"}
+  - {brand: Audemars Piguet, model: Royal Oak Jumbo, ref: "16202ST"}
+  - {brand: Audemars Piguet, model: Royal Oak Chronograph 41, ref: "26240ST"}
+  - {brand: Vacheron Constantin, model: Overseas Blue, ref: "4500V/110A-B128"}
+  - {brand: A. Lange & Sohne, model: Odysseus, ref: "363.179"}
+  - {brand: Omega, model: Speedmaster Silver Snoopy, ref: "310.32.42.50.02.001"}
+  - {brand: Omega, model: Speedmaster 38 Co-Axial Chronograph (black), ref: "324.30.38.50.01.001"}
+  - {brand: Omega, model: Speedmaster 38 Co-Axial Chronograph (blue), ref: "324.30.38.50.03.001"}
+  - {brand: Omega, model: Speedmaster 38 Co-Axial Chronograph (grey), ref: "324.30.38.50.06.001"}
+  - {brand: Tudor, model: Black Bay 58 Bronze, ref: "M79012M"}
+  - {brand: Rolex, model: Land Dweller 40, ref: "127334"}
+  - {brand: Rolex, model: Day Date 40 Olive, ref: "228238"}
+  - {brand: Rolex, model: Daytona Panda Gold, ref: "126508"}
+  - {brand: Rolex, model: Explorer 36, ref: "124270"}
+  - {brand: Rolex, model: Lady-Datejust 28 (steel and white gold), ref: "279174"}
+  - {brand: Rolex, model: Lady-Datejust 28 (steel and Everose), ref: "279171"}
+  - {brand: Rolex, model: Datejust 36 (vintage), ref: "16030"}
+  - {brand: Rolex, model: GMT Master II Root Beer, ref: "126711CHNR"}
+  - {brand: Patek Philippe, model: Nautilus Annual Calendar, ref: "5726/1A"}
+  - {brand: Patek Philippe, model: Nautilus Moonphase, ref: "5712/1A"}
+  - {brand: Patek Philippe, model: Nautilus Travel Time Chrono, ref: "5990/1A"}
+  - {brand: Patek Philippe, model: Aquanaut Travel Time, ref: "5164A"}
+  - {brand: Audemars Piguet, model: Royal Oak 37, ref: "15550ST"}
+  - {brand: Audemars Piguet, model: Royal Oak Offshore 43, ref: "26420SO"}
+  - {brand: Vacheron Constantin, model: Overseas Chronograph Blue, ref: "5500V/110A-B148"}
+  - {brand: Vacheron Constantin, model: Overseas Dual Time, ref: "7900V/110A-B334"}
+  - {brand: A. Lange & Sohne, model: Lange 1, ref: "191.032"}
+  - {brand: Cartier, model: Santos Large, ref: "WSSA0018"}
+  # popular in Singapore: high SG listing volume and easy resale; most hold value rather than appreciate
+  - {brand: Rolex, model: Datejust 41 Fluted, ref: "126334"}
+  - {brand: Rolex, model: Datejust 36 Fluted, ref: "126234"}
+  - {brand: Rolex, model: Oyster Perpetual 36, ref: "126000"}
+  - {brand: Rolex, model: Yacht Master 40, ref: "126622"}
+  - {brand: Rolex, model: Air King, ref: "126900"}
+  - {brand: Patek Philippe, model: Calatrava, ref: "5227G"}
+  - {brand: Omega, model: Speedmaster Moonwatch Sapphire, ref: "310.30.42.50.01.002"}
+  - {brand: Tudor, model: Black Bay 58 GMT, ref: "M7939G1A0NRU"}
+  - {brand: Tudor, model: Black Bay Pro, ref: "M79470"}
+  - {brand: Grand Seiko, model: White Birch, ref: "SLGH005"}
+  - {brand: Panerai, model: Luminor Marina, ref: "PAM01312"}
+  - {brand: Hublot, model: Big Bang Unico 42, ref: "441.NX.1171.RX"}
+  - {brand: IWC, model: Big Pilot, ref: "IW501001"}
+
+# focus models: one card (own message) each with the cheapest open Singapore listing and the value trend per reference.
+# A reference belongs to a model when brand matches and the watchlist model name contains `match`, or is listed in `refs`.
+focus:
+  - {title: Omega Speedmaster, brand: Omega, match: Speedmaster}
+  - {title: Rolex Submariner, brand: Rolex, match: Submariner}
+  - title: Rolex popular and appreciating
+    refs: ["126500LN", "116500LN", "126508", "126710BLRO", "126720VTNR", "126711CHNR", "224270", "124270", "226570",
+           "279174", "279171", "16030", "126000", "124300"]
 
 telegram:
   chat_id: "@your_channel"       # TELEGRAM_CHAT_ID in .env overrides
-  owner_user_id: 0               # your Telegram user id; private chat commands answer only you
+  thread_id: null                # forum topic id; TELEGRAM_THREAD_ID in .env overrides
+  owner_user_id: 0               # your Telegram user id; commands answer only you
   admin_chat_id: ""              # private chat for alerts, never the channel
-  replace_previous_deals: true
 
 schedule:
   timezone: Asia/Singapore
-  collect_cron: "0 6 * * *"
+  # quiet 21:00 to 05:00 SGT: the trading desk runs the US session then (21:30 to 04:00, 22:30 to 05:00 in winter)
+  collect_cron: "7 5 * * *"      # once a day, before the 08:30 market card
+  discover_cron: "30 5 * * *"   # claude -p web search, once a day
   lesson_cron: "0 8 * * *"
-  deals_cron: "30 8 * * *"
-  profile_cron: "30 12 * * *"
-  moves_cron: "30 18 * * *"
-  paper_report_cron: "0 20 * * 0"
+  market_cron: "30 8 * * *"      # daily market card for the watchlist
 
 run:
-  deals_per_day: 10
+  deals_per_alert: 10
   move_alert_pct: 5
   min_comparables: 5
   asking_to_sale_discount: 0.95
@@ -87,14 +154,15 @@ limits:
   daily_calls_watchcharts: 100
   daily_calls_fx: 4
   telegram: {min_gap_seconds: 3.5, max_per_minute: 17, max_retry_after_seconds: 900}
-  claude: {max_calls_per_day: 6}
+  claude: {max_calls_per_day: 8}    # 5 discoveries + 1 lesson + headroom
 
 claude:
-  binary: claude
-  model: sonnet
-  fallback_model: haiku
+  binary: /shim/claude
+  model: haiku                   # every claude -p call runs on haiku (the owner, 2026-10-03)
+  fallback_model: haiku          # equal to model, so no --fallback-model flag is passed
+  discover_model: haiku
   max_retries: 2                 # CLAUDE_CODE_MAX_RETRIES
-  timeout_seconds: 900
+  timeout_seconds: 3000
   discover_max_turns: 40
   write_max_turns: 3
 
@@ -111,9 +179,3 @@ region:
   country: SG
   allowed_tlds: [.sg]
   allow_non_sg_domains_only_for_sg_sellers: true
-
-vault:
-  path: /vault
-  folder: Watchbot
-  host_path: /volume1/obsidian/MainVault
-  chart_days: 90

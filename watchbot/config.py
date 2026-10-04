@@ -112,6 +112,8 @@ def load(path: str | Path | None = None, env: bool = True) -> Cfg:
     for env_key, key in (("TELEGRAM_CHAT_ID", "chat_id"), ("TELEGRAM_ADMIN_CHAT_ID", "admin_chat_id")):
         if os.environ.get(env_key):
             raw["telegram"][key] = os.environ[env_key]
+    if os.environ.get("TELEGRAM_THREAD_ID"):
+        raw["telegram"]["thread_id"] = int(os.environ["TELEGRAM_THREAD_ID"])
     if os.environ.get("TELEGRAM_OWNER_USER_ID"):
         raw["telegram"]["owner_user_id"] = int(os.environ["TELEGRAM_OWNER_USER_ID"])
     s = wrap(raw)
@@ -123,8 +125,6 @@ def load(path: str | Path | None = None, env: bool = True) -> Cfg:
     s.secrets = Cfg(ebay_client_id=os.environ.get("EBAY_CLIENT_ID", ""),
                     ebay_client_secret=os.environ.get("EBAY_CLIENT_SECRET", ""),
                     watchcharts_api_key=os.environ.get("WATCHCHARTS_API_KEY", ""))
-    if os.environ.get("VAULT_DIR"):
-        s.vault.path = os.environ["VAULT_DIR"]
     check_floors(s)
     return s
 
