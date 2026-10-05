@@ -95,13 +95,13 @@ def single_flight(path: Path):
 
 
 def call(s, lim: Limiter, system_file: str, stdin: dict | str, schema: dict, *, web: bool = False,
-         max_turns: int | None = None, model: str | None = None, runner=subprocess.run) -> dict:
+         max_turns: int | None = None, model: str | None = None, bucket: str = "claude", runner=subprocess.run) -> dict:
     """One call; on a Sonnet or Opus limit, one retry on the fallback model. Raises ClaudeFailure."""
     turns = max_turns or (s.claude.discover_max_turns if web else s.claude.write_max_turns)
     payload = stdin if isinstance(stdin, str) else json.dumps(stdin, ensure_ascii=False)
     for attempt in (1, 2):
         try:
-            lim.acquire_claude()
+            lim.acquire_ask() if bucket == "ask" else lim.acquire_claude()
         except Exception as ex:
             raise ClaudeFailure("budget", str(ex))
         cmd = build_cmd(s, system_file, schema, web=web, max_turns=turns, model=model)

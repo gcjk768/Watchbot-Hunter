@@ -155,6 +155,7 @@ limits:
   daily_calls_fx: 4
   telegram: {min_gap_seconds: 3.5, max_per_minute: 17, max_retry_after_seconds: 900}
   claude: {max_calls_per_day: 8}    # 5 discoveries + 1 lesson + headroom
+  ask: {max_calls_per_day: 10}       # /watchask questions: their own budget, so they never take from the scheduled jobs
 
 claude:
   binary: claude

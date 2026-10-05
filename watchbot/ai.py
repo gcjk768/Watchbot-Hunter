@@ -93,3 +93,17 @@ def lesson(s, db, lim, today: str) -> dict:
     db.execute("INSERT INTO lessons(topic, cycle, title, body_json, posted_at) VALUES(?,?,?,?,?)",
                (topic, cycle, out["title"], json.dumps(out, ensure_ascii=False), today))
     return {**out, "topic": topic, "cycle": cycle}
+
+
+
+def ask(s, db, lim, question: str, context: str) -> str:
+    """One question about the owner's own tracker data (listings, market values, deals). Claude answers from `context`
+    only; the same rule check as the lesson applies (no figure that is not in the data, no promises, no links).
+    Raises claude.ClaudeFailure or ValueError (rule check)."""
+    system, schema = _prompt(s, "ask")
+    out = claude.call(s, lim, system, {"question": question[:500], "data": context[:9000]}, schema, bucket="ask")
+    answer = textcheck.undash(out["answer"])
+    bad = textcheck.problems(answer, [context, question])
+    if bad:
+        raise ValueError("answer failed the rule check: " + "; ".join(bad))
+    return answer
