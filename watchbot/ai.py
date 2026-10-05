@@ -78,6 +78,9 @@ def lesson(s, db, lim, today: str) -> dict:
                *[r["retail_sgd"] for r in refs if r["retail_sgd"]], *fees.values(),
                *s.costs.service_reserve_sgd.__dict__.values()]
     numbers = [f"{x:,.0f}" if isinstance(x, float) else str(x) for x in numbers]
+    # Reference numbers and model names (126610LN, Black Bay 58) are facts the bot itself supplies, so the lesson may
+    # quote their digits; only invented prices, fees and counts are rejected by the rule check.
+    numbers += [str(r[f]) for r in refs for f in ("ref", "model", "brand") if any(c.isdigit() for c in str(r[f]))]
     stdin = {"topic": topic, "cycle": cycle, "references": refs, "sell_fees_pct": fees,
              "service_reserve_sgd": dict(s.costs.service_reserve_sgd.items()),
              "authentication_sgd": s.costs.authentication_sgd, "allowed_numbers": numbers,
