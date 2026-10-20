@@ -159,7 +159,7 @@ limits:
 
 claude:
   binary: claude
-  model: haiku                   # every claude -p call runs on haiku (the owner, 2026-10-03)
+  model: claude-haiku-5-5                   # every claude -p call runs on haiku (the owner, 2026-10-03)
   fallback_model: haiku          # equal to model, so no --fallback-model flag is passed
   discover_model: haiku
   max_retries: 2                 # CLAUDE_CODE_MAX_RETRIES
