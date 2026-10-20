@@ -16,15 +16,16 @@ from .alerts import Alerts
 from .telegram import Telegram
 
 log = logging.getLogger(__name__)
-BUTTONS = [("🔄 Run again", "watchlistings"), ("💎 Deals", "watchdeals"), ("📈 Market", "watchmarket"), ("🎯 Focus", "watchfocus")]
-CALLBACKS = {"watchlistings", "watchmarket", "watchfocus", "watchdeals", "watchstatus"}   # cheap commands only, never a Claude call
+BUTTONS = [("🔄 Run again", "watchlistings"), ("💎 Deals", "watchdeals"), ("📈 Market", "watchmarket"), ("🎯 Focus", "watchfocus"), ("📰 News", "watchnews")]
+CALLBACKS = {"watchlistings", "watchmarket", "watchfocus", "watchnews", "watchbuy", "watchdeals", "watchstatus"}   # cheap commands only, never a Claude call
 HELP = "\n".join([
     cards.header("hello", "Singapore watch market"), "",
     "/watchlistings · the latest Singapore listings with buy links",
     "/watchmarket · market value per watched reference",
     "/watchfocus · Omega Speedmaster and Rolex Submariner: cheapest now, appreciation or depreciation",
+    "/watchbuy · first purchase guide: Omega for you, Rolex for your parents",
+    "/watchnews · the latest watch market news",
     "/watchdeals · open deals that clear your margin",
-    "/watchask <code>question</code> · ask about your listings, market values and deals (10 a day)",
     "/watchlist · the watchlist with retail prices",
     "/watchadd <code>REF Brand Model</code> · watch a reference",
     "/watchdel <code>REF</code> · stop watching it",
@@ -169,20 +170,6 @@ def market_job(x) -> None:
     vault.write_home()
 
 
-def _typing_loop(x, chat, thread, stop, every: float = 4.0) -> None:
-    """Show 'typing...' until `stop` is set. Sent straight to the Bot API (not through the message budget): one light call
-    every few seconds, best effort."""
-    payload = {"chat_id": chat, "action": "typing"}
-    if thread:
-        payload["message_thread_id"] = thread
-    while not stop.is_set():
-        try:
-            x.tg.http.post("sendChatAction", json=payload, timeout=5)
-        except Exception:   # noqa: BLE001
-            pass
-        stop.wait(every)
-
-
 class Bot:
     """Owner only, in the private chat or inside the bot's own forum topic. Unique /watch* names (shared group)."""
 
@@ -218,7 +205,6 @@ class Bot:
         if not fn:
             return   # other bots' commands in a shared group: stay silent
         vault.log_event("💬", "command", f"/{cmd} {arg}".strip())
-        self._m = m   # the listener handles one update at a time; commands that answer later need the chat
         texts = fn(arg)
         chat, thread = m["chat"]["id"], m.get("message_thread_id")
         for i, t in enumerate(texts):
@@ -239,6 +225,16 @@ class Bot:
     def cmd_watchfocus(self, arg):
         return focus_cards(self.x)
 
+    def cmd_watchnews(self, arg):
+        rows = [dict(r) for r in self.x.db.execute(
+            "SELECT * FROM news WHERE found_at >= date(?, '-14 day') ORDER BY COALESCE(date, found_at) DESC, id DESC LIMIT 10",
+            (self.x.lim.today(),))]
+        return cards.news(rows, new=False) or [cards.header("news", "last 14 days") + "\n\n⚪ <i>No news stored yet. "
+                                               "Discovery looks every 3 hours.</i>"]
+
+    def cmd_watchbuy(self, arg):
+        return [cards.buy_guide()] + focus_cards(self.x)
+
     def cmd_watchdeals(self, arg):
         return deal_cards(self.x, only_new=False) or [cards.header("deals", cards.today()) + "\n\n⚪ <i>No open "
                                                       "Singapore listing clears your margin and profit floors.</i>"]
@@ -248,9 +244,9 @@ class Bot:
         return [cards.status(report(self.s, self.x.db, self.x.lim))]
 
     def cmd_watchlist(self, arg):
-        rows = refsmod.watched(self.x.db)
+        rows = [r for r in refsmod.watched(self.x.db) if r.get("retail_sgd")]   # no price, nothing to show
         blocks = [cards.card(n, cards.plain_name(r), r.get("retail_url"),
-                             ["🏷 " + cards.dot(f"Retail {cards.money(r['retail_sgd'])}", r.get("retail_date"))], desc=r["ref"])
+                             ["🏷 " + cards.dot(cards.retail(r), r.get("retail_date"))], desc=r["ref"])
                   for n, r in enumerate(rows, start=1)]
         return cards.split(cards.header("watchlist", f"{len(rows)} references"), blocks)
 
@@ -268,47 +264,6 @@ class Bot:
         ok = refsmod.remove(self.x.db, arg.split()[0])
         vault.log_event("❌", "stopped watching", arg.split()[0])
         return [f"❌ Stopped watching <code>{cards.esc(arg.split()[0])}</code>." if ok else "Not on the watchlist."]
-
-    def _context(self) -> str:
-        """The data the answer may use: the same cards /watchlistings, /watchmarket, /watchdeals and /watchfocus show, as plain text."""
-        import html
-        import re
-        x = self.x
-        with x.lim.lock:
-            texts, _ = listing_cards(x, 15)
-            blocks = [("LATEST SINGAPORE LISTINGS", texts), ("MARKET VALUE PER REFERENCE", market_cards(x)),
-                      ("OPEN DEALS", deal_cards(x, only_new=False)), ("FOCUS WATCHES", focus_cards(x))]
-        raw = "\n\n".join(f"{title}\n" + "\n".join(t or []) for title, t in blocks)
-        return re.sub(r"\n{3,}", "\n\n", html.unescape(re.sub(r"<[^>]+>", "", raw)))
-
-    def cmd_watchask(self, arg):
-        if not arg:
-            return ["Use /watchask <code>your question</code>, for example /watchask which Submariner listing is cheapest?"]
-        m = self._m
-        threading.Thread(target=self._answer, args=(arg, m["chat"]["id"], m.get("message_thread_id")),
-                         name="watch-ask", daemon=True).start()
-        return [cards.header("ask", "thinking…")]
-
-    def _answer(self, question: str, chat, thread) -> None:
-        """Runs off the listener thread: a Claude call can take a minute and must not block the other commands."""
-        from . import ai, claude
-        stop = threading.Event()
-        threading.Thread(target=_typing_loop, args=(self.x, chat, thread, stop), name="watch-typing", daemon=True).start()
-        try:
-            answer = ai.ask(self.s, self.x.db, self.x.lim, question, self._context())
-            text = cards.header("ask", question[:50]) + "\n\n" + cards.esc(answer)
-            vault.log_event("🤔", "/watchask answered", question[:120])
-        except claude.ClaudeFailure as ex:
-            text = ("⏳ Today's question budget is used up. It resets at midnight Singapore time." if ex.kind == "budget"
-                    else "⚠️ I cannot answer right now: " + cards.esc(str(ex.kind)) + ". Try again in a few minutes.")
-        except ValueError:
-            text = "⚠️ I could not answer that safely from the data I hold. Try a narrower question."
-        except Exception:   # noqa: BLE001
-            log.exception("/watchask failed")
-            text = "⚠️ Something went wrong answering that. It is in the log."
-        finally:
-            stop.set()
-        self.x.tg.send(chat, text, thread_id=thread, buttons=BUTTONS)
 
 
 def heartbeat(s) -> None:

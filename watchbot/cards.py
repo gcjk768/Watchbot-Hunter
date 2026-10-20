@@ -15,10 +15,10 @@ SECTION_TITLES = {
     "market": "📈 Watch market",
     "focus": "🎯 Watch focus",
     "lesson": "🎓 Watch lesson",
-    "ask": "🤔 Ask Watchbot",
     "status": "🩺 Watchbot status",
     "watchlist": "📋 Watchlist",
     "news": "📰 Watch news",
+    "buy": "🛍 Watch first purchase",
     "alert": "🚨 Watchbot alert",
     "hello": "⌚ Watchbot",
 }
@@ -39,6 +39,11 @@ def esc(v) -> str:
 
 def money(v) -> str:
     return "n/a" if v is None else f"${v:,.0f}"
+
+
+def retail(ref: dict) -> str:
+    """"Retail $x" or nothing: a card never prints a figure we do not have."""
+    return f"Retail {money(ref['retail_sgd'])}" if ref.get("retail_sgd") else ""
 
 
 def delta(value: float, pct: float | None = None) -> str:
@@ -126,7 +131,7 @@ def listing_block(n: int, l: dict, ref: dict, market_value: float | None, tag: s
     p = l["price_sgd"]
     from_search = '"from_search": true' in (l.get("raw_json") or "")
     lines = ["💰 " + dot(money(p), *_facts(l)),
-             "📊 " + " · ".join(x for x in [esc(f"Retail {money(ref.get('retail_sgd'))}"),
+             "📊 " + " · ".join(x for x in [esc(retail(ref)),
                                            esc(f"market {money(market_value)}") if market_value else "",
                                            _vs(p, base, what)] if x),
              "🏠 " + dot(shop(l.get("url") or "") or l["source"], l.get("seller_type"))
@@ -149,7 +154,7 @@ def deal_block(n: int, d: dict) -> str:
     lines = ["💰 " + dot(money(l["price_sgd"]), *_facts(l)),
              f"🟢 <b>Net {esc(money(d['net']))}</b> <i>({d['margin_pct']}%)</i> · "
              + dot(f"via {CHANNELS.get(d['channel'], d['channel'])}", f"landed {money(d['landed'])}"),
-             "📊 " + " · ".join([esc(f"Market {money(d['market'])}"), esc(f"retail {money(ref.get('retail_sgd'))}"),
+             "📊 " + " · ".join([esc(f"Market {money(d['market'])}"), esc(retail(ref).lower()),
                                 _vs(l["price_sgd"], d["market"], "market")]),
              "🏠 " + dot(shop(l.get("url") or "") or l["source"], l.get("seller_type")),
              ("⚠️ <i>" + esc("; ".join(d["flags"])) + "</i>") if d["flags"] else "",
@@ -174,9 +179,10 @@ def market(refs: list[dict], mv: dict[str, dict], day: str) -> list[str]:
                 move = f" · {mark(m['move_pct'], 1, 1)} <i>{'▼' if m['move_pct'] < 0 else '▲'}{abs(m['move_pct'])}% 7d</i>"
             line = "💰 " + dot(f"Market {money(m['value'])}", f"{m['n']} asks", "thin" if m["label"] != "market" else "") + move
         else:
-            line = "⚪ <i>no Singapore asks yet</i>"
-        retail = "🏷 " + dot(f"Retail {money(r.get('retail_sgd'))}", r.get("retail_date"))
-        blocks.append(card(n, plain_name(r), None, [line, retail], desc=r["ref"]))
+            line = ""
+        rt = "🏷 " + dot(retail(r), r.get("retail_date")) if retail(r) else ""
+        if line or rt:   # no asks and no retail: nothing to say, so no card
+            blocks.append(card(len(blocks) + 1, plain_name(r), None, [line, rt], desc=r["ref"]))
     return split(header("market", day), blocks, note(
         "Market = trimmed median of Singapore asking prices from the last 30 days, times 0.95 because asks sit above "
         "sales. Thin = fewer than five asks, shown but never used for deals. 🟢 cheaper, 🔴 dearer over 7 days."))
@@ -205,7 +211,7 @@ def focus_card(f: dict) -> str:
         body = ["💸 <b>Cheapest now</b>\n⚪ <i>no open Singapore listing yet</i>"]
     blocks = [card(i, plain_name(r["ref"]), None,
                    ["💰 " + dot(f"Market {money(r['market'])}" if r["market"] else "Market thin", f"{r['n']} asks",
-                                f"Retail {money(r['ref'].get('retail_sgd'))}"), _trend_line(r)], desc=r["ref"]["ref"])
+                                retail(r["ref"])), _trend_line(r)], desc=r["ref"]["ref"])
               for i, r in enumerate(f["refs"], 1)]
     return "\n\n".join([header("focus", f["title"])] + body + ["📊 <b>Value by reference</b>"] + blocks +
                          [note("Asking prices, not sales. Market = trimmed median of 30-day Singapore asks times 0.95, "
@@ -217,10 +223,30 @@ def lesson(title: str, body: str, action: str, topic: str) -> str:
     return "\n\n".join([header("lesson", topic), f"🎓 <b>{esc(title)}</b>\n{esc(body)}", f"✅ <i>Today:</i> {esc(action)}"])
 
 
-def news(items: list[dict]) -> list[str]:
-    blocks = [card(i, n["headline"], n.get("url"), [esc(n["gist"])], "NEW", emoji="📰", desc=n["ref_or_brand"])
+def news(items: list[dict], new: bool = True) -> list[str]:
+    blocks = [card(i, n["headline"], n.get("url"), [esc(n["gist"]), ("🕒 " + esc(n["date"])) if n.get("date") else ""],
+                   "NEW" if new else "", emoji="📰", desc=n["ref_or_brand"])
               for i, n in enumerate(items, start=1)]
-    return split(header("news", f"{len(items)} new"), blocks)
+    return split(header("news", f"{len(items)} new" if new else f"latest {len(items)}"), blocks) if blocks else []
+
+
+def buy_guide() -> str:
+    """Static first purchase checklist (general guidance, no numbers): Omega for you, Rolex for your parents."""
+    return "\n\n".join([
+        header("buy", "Omega for you, Rolex for your parents"),
+        "🆕 <b>Brand new</b> · authorised dealer, full warranty, the retail price on the market card. Popular Rolex "
+        "sports models can have a waitlist; ask the boutique what is available now.",
+        "⌚ <b>Pre-owned</b> · often below retail for Omega and many Rolex references, but check: "
+        "🔹 box, papers and warranty card with matching reference and serial · 🔹 service history, and budget a service "
+        "if none · 🔹 dealer with a return window and a written warranty · 🔹 pay by traceable, protected method · "
+        "🔹 never buy on a deal that looks too good, the bot flags those ⚠️",
+        "🎁 <b>For your parents</b> · try it on first: case size and bracelet fit, weight, easy-to-read dial, "
+        "date window, and a model that needs little fuss. Steel Datejust and Oyster Perpetual suit daily wear.",
+        "🧭 <b>For you (Omega)</b> · Speedmaster Moonwatch is the classic first Omega; Seamaster and Aqua Terra "
+        "wear smaller on the wrist. Handle one in a shop before choosing a size.",
+        "✅ <b>Next</b> · set budget and style, then /watchfocus (cheapest now and value trend), /watchmarket "
+        "(market vs retail), /watchnews, and /watchdeals.",
+        note("General guidance, not financial advice. Prices are asks, not sales. Paper mode: learn first.")])
 
 
 def status(text: str) -> str:

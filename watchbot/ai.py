@@ -39,6 +39,7 @@ def discover(s, db, lim, today: str) -> dict:
              "refs": [{"brand": r["brand"], "model": r["model"], "ref": r["ref"], "aliases": r["aliases"]} for r in watched],
              "allowed_domains": [".sg sites", "ebay.com.sg", *(s.rules.get("sg_dealers") or {}).keys()],
              "never_fetch_domains": list(s.never_fetch_domains),
+             "refs_need_retail": [r["ref"] for r in watched if not r["retail_sgd"]],
              "already_done": vault.recent(1500)}
     out = claude.call(s, lim, system, stdin, schema, web=True, model=s.claude.discover_model)
     known = {r["ref"]: r for r in watched}
@@ -56,6 +57,11 @@ def discover(s, db, lim, today: str) -> dict:
     kept, dropped = region.keep_sg(found, s)
     for l in kept:
         collect.upsert(db, l, today)
+    for x in out.get("retail") or []:   # brand new list price: only for refs without one, only from a page naming the ref
+        r = known.get(x.get("ref"))
+        if r and not r["retail_sgd"] and (x.get("price_sgd") or 0) > 0 and buyable(x.get("url") or "", r):
+            db.execute("UPDATE refs SET retail_sgd=?, retail_url=?, retail_date=? WHERE ref=?",
+                       (float(x["price_sgd"]), x["url"], today, r["ref"]))
     news = []
     for n in out.get("news") or []:
         if n.get("url") and db.execute("INSERT OR IGNORE INTO news(ref_or_brand, headline, gist, url, date, found_at) "
@@ -78,9 +84,6 @@ def lesson(s, db, lim, today: str) -> dict:
                *[r["retail_sgd"] for r in refs if r["retail_sgd"]], *fees.values(),
                *s.costs.service_reserve_sgd.__dict__.values()]
     numbers = [f"{x:,.0f}" if isinstance(x, float) else str(x) for x in numbers]
-    # Reference numbers and model names (126610LN, Black Bay 58) are facts the bot itself supplies, so the lesson may
-    # quote their digits; only invented prices, fees and counts are rejected by the rule check.
-    numbers += [str(r[f]) for r in refs for f in ("ref", "model", "brand") if any(c.isdigit() for c in str(r[f]))]
     stdin = {"topic": topic, "cycle": cycle, "references": refs, "sell_fees_pct": fees,
              "service_reserve_sgd": dict(s.costs.service_reserve_sgd.items()),
              "authentication_sgd": s.costs.authentication_sgd, "allowed_numbers": numbers,
@@ -93,17 +96,3 @@ def lesson(s, db, lim, today: str) -> dict:
     db.execute("INSERT INTO lessons(topic, cycle, title, body_json, posted_at) VALUES(?,?,?,?,?)",
                (topic, cycle, out["title"], json.dumps(out, ensure_ascii=False), today))
     return {**out, "topic": topic, "cycle": cycle}
-
-
-
-def ask(s, db, lim, question: str, context: str) -> str:
-    """One question about the owner's own tracker data (listings, market values, deals). Claude answers from `context`
-    only; the same rule check as the lesson applies (no figure that is not in the data, no promises, no links).
-    Raises claude.ClaudeFailure or ValueError (rule check)."""
-    system, schema = _prompt(s, "ask")
-    out = claude.call(s, lim, system, {"question": question[:500], "data": context[:9000]}, schema, bucket="ask")
-    answer = textcheck.undash(out["answer"])
-    bad = textcheck.problems(answer, [context, question])
-    if bad:
-        raise ValueError("answer failed the rule check: " + "; ".join(bad))
-    return answer

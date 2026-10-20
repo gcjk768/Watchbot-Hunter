@@ -45,7 +45,7 @@ def test_thin_market_never_makes_deals(s, db):
 
 
 def test_cards_escape_and_split():
-    ref = {"brand": "A<b>", "model": "M&M", "ref": "X1", "retail_sgd": None, "retail_date": None}
+    ref = {"brand": "A<b>", "model": "M&M", "ref": "X1", "retail_sgd": 1000, "retail_date": "2026-10-02"}
     out = cards.market([ref] * 60, {}, "2026-10-03")
     assert len(out) > 1 and all(len(t) <= 4096 for t in out)
     assert "A&lt;b&gt;" in out[0] and "<b>A<b>" not in out[0]
@@ -140,3 +140,21 @@ def test_focus_cards_cheapest_and_trend(s, db):
     assert t["since"] == "2026-08-01" and t["pct"] > 0
     texts = [cards.focus_card(f) for f in out[:2]]
     assert "APPRECIATING" in texts[1] and "Cheapest now" in texts[0] and all(len(t) <= 4096 for t in texts)
+
+
+def test_cards_omit_data_we_do_not_have():
+    empty = {"brand": "A", "model": "B", "ref": "NOINFO", "retail_sgd": None, "retail_date": None}
+    priced = {"brand": "C", "model": "D", "ref": "PRICED", "retail_sgd": 9900, "retail_date": "2026-10-02"}
+    out = "\n".join(cards.market([empty, priced], {}, "2026-10-20"))
+    assert "NOINFO" not in out and "n/a" not in out and "no Singapore asks" not in out
+    assert "1. C D" in out and "Retail $9,900" in out
+
+
+def test_news_and_buy_commands(s, db):
+    from types import SimpleNamespace
+    db.execute("INSERT INTO news(ref_or_brand, headline, gist, url, date, found_at) VALUES('Rolex','Rolex raises prices',"
+               "'g','https://x.sg/a','2026-10-19','2026-10-19')")
+    bot = Bot(SimpleNamespace(s=s, db=db, lim=SimpleNamespace(today=lambda: "2026-10-20")))
+    assert "Rolex raises prices" in bot.cmd_watchnews("")[0]
+    assert "Omega" in cards.buy_guide() and all(len(t) <= 4096 for t in [cards.buy_guide()])
+    assert cards.news([]) == []

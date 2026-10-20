@@ -1,6 +1,5 @@
 services:
   watchbot:
-    networks: [default, scrape-net]   # shared Playwright server ws://playwright:3000/
     build:
       context: .
       args:
@@ -13,7 +12,6 @@ services:
     init: true
     env_file: .env
     environment:
-      PLAYWRIGHT_WS_URL: ws://playwright:3000/
       TZ: Asia/Singapore
       VAULT_DIR: /vault
     volumes:
@@ -31,7 +29,3 @@ services:
     # One shot commands on the NAS:
     #   docker compose exec watchbot watchbot status
     #   docker compose exec watchbot watchbot hello
-
-networks:
-  scrape-net:
-    external: true
