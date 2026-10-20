@@ -84,6 +84,9 @@ def lesson(s, db, lim, today: str) -> dict:
                *[r["retail_sgd"] for r in refs if r["retail_sgd"]], *fees.values(),
                *s.costs.service_reserve_sgd.__dict__.values()]
     numbers = [f"{x:,.0f}" if isinstance(x, float) else str(x) for x in numbers]
+    # Reference numbers and model names (126610LN, Black Bay 58) are facts the bot itself supplies, so the lesson may
+    # quote their digits; only invented prices, fees and counts are rejected by the rule check.
+    numbers += [str(r[f]) for r in refs for f in ("ref", "model", "brand") if any(c.isdigit() for c in str(r[f]))]
     stdin = {"topic": topic, "cycle": cycle, "references": refs, "sell_fees_pct": fees,
              "service_reserve_sgd": dict(s.costs.service_reserve_sgd.items()),
              "authentication_sgd": s.costs.authentication_sgd, "allowed_numbers": numbers,
@@ -96,3 +99,17 @@ def lesson(s, db, lim, today: str) -> dict:
     db.execute("INSERT INTO lessons(topic, cycle, title, body_json, posted_at) VALUES(?,?,?,?,?)",
                (topic, cycle, out["title"], json.dumps(out, ensure_ascii=False), today))
     return {**out, "topic": topic, "cycle": cycle}
+
+
+
+def ask(s, db, lim, question: str, context: str) -> str:
+    """One question about the owner's own tracker data (listings, market values, deals). Claude answers from `context`
+    only; the same rule check as the lesson applies (no figure that is not in the data, no promises, no links).
+    Raises claude.ClaudeFailure or ValueError (rule check)."""
+    system, schema = _prompt(s, "ask")
+    out = claude.call(s, lim, system, {"question": question[:500], "data": context[:9000]}, schema, bucket="ask")
+    answer = textcheck.undash(out["answer"])
+    bad = textcheck.problems(answer, [context, question])
+    if bad:
+        raise ValueError("answer failed the rule check: " + "; ".join(bad))
+    return answer

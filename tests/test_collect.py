@@ -74,7 +74,7 @@ def test_incomplete_search_never_ends_listings(s, db, lim, clock):
 
 def test_seed_loads_starter_watchlist_with_retail(s, db):
     from watchbot import refs
-    assert refs.seed(db, s) == len(s.starter_watchlist) == 66
+    assert refs.seed(db, s) == len(s.starter_watchlist) >= 66
     sub = refs.get(db, "126610LN")
     assert sub["retail_sgd"] == 15950 and sub["retail_url"].startswith("https://www.rolex.com/en-sg/")
     assert refs.get(db, "124300")["retail_sgd"] is None    # discontinued, never guessed

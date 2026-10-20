@@ -15,6 +15,7 @@ SECTION_TITLES = {
     "market": "📈 Watch market",
     "focus": "🎯 Watch focus",
     "lesson": "🎓 Watch lesson",
+    "ask": "🤔 Ask Watchbot",
     "status": "🩺 Watchbot status",
     "watchlist": "📋 Watchlist",
     "news": "📰 Watch news",

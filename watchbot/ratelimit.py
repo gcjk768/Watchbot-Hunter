@@ -1,4 +1,4 @@
-"""Polite limits in one place. Buckets: web (per domain), ebay, watchcharts, fx, telegram, claude.
+"""Polite limits in one place. Buckets: web (per domain), ebay, watchcharts, fx, telegram, claude, ask.
 
 Jittered gaps, rolling per minute caps, daily caps that roll over at midnight Asia/Singapore, cooldowns after
 429, 403 or three failures in a row. State lives in SQLite so a restart never resets a budget or a cooldown.
@@ -38,7 +38,7 @@ class Limiter:
         L = self.s.limits
         return {"web": L.web.max_requests_per_day, "chrono24": L.web.chrono24_pages_per_day,
                 "ebay": L.daily_calls_ebay, "watchcharts": L.daily_calls_watchcharts, "fx": L.daily_calls_fx,
-                "claude": L.claude.max_calls_per_day}.get(bucket, float("inf"))
+                "claude": L.claude.max_calls_per_day, "ask": self.ask_cap()}.get(bucket, float("inf"))
 
     def gap(self, bucket: str) -> tuple[float, float]:
         L = self.s.limits
@@ -145,6 +145,17 @@ class Limiter:
             if self.claude_left() <= 0:
                 raise BudgetExhausted(f"claude: {self.daily_cap('claude')} calls a day already used")
             self._bump("claude")
+
+    # ask (the /watchask command has its own daily budget) -----------------------------------------------
+    def ask_cap(self) -> float:
+        a = self.s.limits.get("ask")
+        return float(a.get("max_calls_per_day", 10)) if a else 10.0
+
+    def acquire_ask(self) -> None:
+        with self.lock:
+            if self.left("ask") <= 0:
+                raise BudgetExhausted(f"ask: {self.ask_cap():.0f} questions a day already used")
+            self._bump("ask")
 
     def sleep(self, seconds: float) -> None:
         self._sleep(seconds)

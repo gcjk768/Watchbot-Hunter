@@ -11,7 +11,7 @@ import logging
 import re
 from datetime import date, timedelta
 
-from selectolax.parser import HTMLParser
+from selectolax.lexbor import LexborHTMLParser as HTMLParser   # selectolax 1.0 removed the Modest backend
 
 from ..ratelimit import LimitError
 from ..web import Blocked
