@@ -4,6 +4,10 @@ A small scheduled bot for learning the Singapore luxury watch market: market val
 
 Live on the NAS (Docker stack `watchbot`), posting to the owner Channel topic 4164 as @owner_watchbot. Hourly eBay SG collect with a card for new deals only, daily discovery (06:30), lesson (08:00) and market card (08:30). Commands: `/watchhelp /watchmarket /watchdeals /watchlist /watchadd /watchdel /watchstatus`. Docs: `docs/vault/`. Deploy: `sh deploy.sh`.
 
+## Architecture
+
+![Architecture of watchbot](docs/architecture.svg)
+
 ## Sources: robots.txt and terms check (2026-10-02)
 
 The build environment could not open most of these sites (its network policy blocked them), so the findings below come from search results that quote the pages. Each one needs a manual recheck from the NAS. The bot fails safe: a source whose terms are not confirmed as allowing automated access is not fetched. It stays reachable only through discovery snippets labelled "from search". Verdicts live in `rules.yaml`; change a verdict only after reading the terms yourself.
